@@ -11,7 +11,7 @@ export function SpecialOfferSection() {
           {/* Large Banner */}
           <div className="lg:col-span-5 bg-cream rounded-2xl p-6 lg:p-8 relative overflow-hidden flex flex-col justify-between h-80">
             <div>
-              <span className="text-xs font-semibold text-coral uppercase tracking-wider">
+              <span className="text-xs font-semibold text-brand uppercase tracking-wider">
                 Special Offer
               </span>
               <h2 className="text-2xl lg:text-3xl font-bold text-navy mt-2 mb-3">
@@ -19,7 +19,7 @@ export function SpecialOfferSection() {
                 <br />
                 Best Picks!
               </h2>
-              <Button className="bg-coral hover:bg-coral-dark text-white rounded-full px-6 h-10 text-sm font-semibold">
+              <Button className="bg-brand hover:bg-brand-dark text-white rounded-full px-6 h-10 text-sm font-semibold">
                 Up to 50% Off
               </Button>
             </div>

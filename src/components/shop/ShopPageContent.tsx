@@ -5,14 +5,18 @@ import { ShopFilterSidebar } from "@/components/shop/ShopFilterSidebar";
 import { ShopProductCard } from "@/components/shop/ShopProductCard";
 import { ShopToolbar } from "@/components/shop/ShopToolbar";
 import { ShopPagination } from "@/components/shop/ShopPagination";
-import { shopProducts } from "@/data/shop";
+import type { ShopProduct } from "@/types";
 
 const DEFAULT_FILTERS = [
   { id: "best-seller", label: "Best Seller" },
   { id: "in-stock", label: "In Stock" },
 ];
 
-export function ShopPageContent() {
+interface ShopPageContentProps {
+  products: ShopProduct[];
+}
+
+export function ShopPageContent({ products }: ShopPageContentProps) {
   const [priceRange, setPriceRange] = useState<[number, number]>([10_000, 70_000]);
   const [activeFilters, setActiveFilters] = useState(DEFAULT_FILTERS);
 
@@ -43,7 +47,7 @@ export function ShopPageContent() {
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-8">
-              {shopProducts.map((product, index) => (
+              {products.map((product, index) => (
                 <ShopProductCard
                   key={product.id}
                   product={product}

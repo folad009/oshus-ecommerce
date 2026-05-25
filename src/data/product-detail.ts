@@ -1,5 +1,5 @@
 import type { ProductDetail, ShopProduct } from "@/types";
-import { shopProducts } from "@/data/shop";
+import { getShopProductById } from "@/lib/shop-catalog";
 
 const serumImages = [
   "https://images.unsplash.com/photo-1620916563828-0db4a4a758a0?w=800&h=900&fit=crop",
@@ -58,8 +58,10 @@ const productDetailsMap: Record<string, ProductDetailExtras> = {
   },
 };
 
-function buildProductDetail(id: string): ProductDetail | undefined {
-  const base = shopProducts.find((p) => p.id === id);
+async function buildProductDetail(
+  id: string
+): Promise<ProductDetail | undefined> {
+  const base = await getShopProductById(id);
   if (!base) return undefined;
 
   const extra = productDetailsMap[id];
@@ -96,16 +98,20 @@ function buildProductDetail(id: string): ProductDetail | undefined {
   };
 }
 
-export function getProductDetail(id: string): ProductDetail | undefined {
+export async function getProductDetail(
+  id: string
+): Promise<ProductDetail | undefined> {
   return buildProductDetail(id);
 }
 
-export function getRelatedProducts(
+export async function getRelatedProducts(
   currentId: string,
   category: string,
   limit = 4
-): ShopProduct[] {
-  return shopProducts
+): Promise<ShopProduct[]> {
+  const { getApprovedShopProducts } = await import("@/lib/shop-catalog");
+  const products = await getApprovedShopProducts();
+  return products
     .filter((p) => p.id !== currentId && p.category === category)
     .slice(0, limit);
 }

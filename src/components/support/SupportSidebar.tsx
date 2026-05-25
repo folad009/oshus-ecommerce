@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supportNavItems } from "@/data/support";
+import { Logo } from "@/components/Logo";
 
 const iconMap = {
   "layout-dashboard": LayoutDashboard,
@@ -35,14 +36,13 @@ export function SupportSidebar({ open, onClose }: SupportSidebarProps) {
 
   const navContent = (
     <>
-      <div className="flex items-center gap-2 px-5 py-6 border-b border-white/10">
-        <div className="size-9 bg-gold rounded-lg flex items-center justify-center shrink-0">
-          <span className="text-forest font-bold text-sm">O</span>
-        </div>
-        <div>
-          <p className="font-bold text-white text-sm">Oshus Store</p>
-          <p className="text-white/50 text-xs">Support Portal</p>
-        </div>
+      <div className="px-5 py-6 border-b border-white/10">
+        <Logo
+          size="sm"
+          textClassName="text-white"
+          accentClassName="text-brand"
+        />
+        <p className="text-white/50 text-xs mt-2">Support Portal</p>
       </div>
 
       <nav className="flex flex-col gap-1 p-4 flex-1">
@@ -61,7 +61,7 @@ export function SupportSidebar({ open, onClose }: SupportSidebarProps) {
               className={cn(
                 "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-gold text-forest"
+                  ? "bg-brand text-white"
                   : "text-white/70 hover:bg-white/10 hover:text-white"
               )}
             >
@@ -80,7 +80,7 @@ export function SupportSidebar({ open, onClose }: SupportSidebarProps) {
           View Store
         </Link>
         <Link
-          href="/logout"
+          href="/logout/support"
           className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
         >
           <LogOut className="size-4" />
@@ -92,7 +92,7 @@ export function SupportSidebar({ open, onClose }: SupportSidebarProps) {
 
   return (
     <>
-      <aside className="hidden lg:flex flex-col w-[260px] bg-forest shrink-0 min-h-screen sticky top-0">
+      <aside className="hidden lg:flex flex-col w-[260px] bg-navy shrink-0 min-h-screen sticky top-0">
         {navContent}
       </aside>
 
@@ -106,7 +106,7 @@ export function SupportSidebar({ open, onClose }: SupportSidebarProps) {
 
       <aside
         className={cn(
-          "lg:hidden fixed inset-y-0 left-0 z-50 w-[260px] bg-forest flex flex-col transition-transform duration-300",
+          "lg:hidden fixed inset-y-0 left-0 z-50 w-[260px] bg-navy flex flex-col transition-transform duration-300",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >

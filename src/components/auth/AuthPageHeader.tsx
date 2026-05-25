@@ -21,11 +21,11 @@ export function AuthPageHeader({ title, breadcrumb }: AuthPageHeaderProps) {
           {title}
         </h1>
         <nav className="text-sm text-muted-foreground">
-          <Link href="/" className="hover:text-forest transition-colors">
+          <Link href="/" className="hover:text-brand transition-colors">
             Home
           </Link>
           <span className="mx-2">/</span>
-          <span className="text-forest">{breadcrumb}</span>
+          <span className="text-brand">{breadcrumb}</span>
         </nav>
       </div>
     </section>

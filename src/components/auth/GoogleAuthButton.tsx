@@ -3,6 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import type { AuthPortal } from "@/data/auth";
+import {
+  authRedirects,
+  getSafePortalRedirect,
+  isProtectedPortal,
+  portalLoginHints,
+} from "@/data/auth";
 
 function GoogleIcon() {
   return (
@@ -29,20 +36,56 @@ function GoogleIcon() {
 
 interface GoogleAuthButtonProps {
   mode: "login" | "signup";
+  redirectTo?: string;
+  portal?: AuthPortal;
+  postLoginRedirect?: string;
 }
 
-export function GoogleAuthButton({ mode }: GoogleAuthButtonProps) {
+export function GoogleAuthButton({
+  mode,
+  redirectTo = "/account",
+  portal = "customer",
+  postLoginRedirect,
+}: GoogleAuthButtonProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const label =
     mode === "login" ? "Continue with Google" : "Sign up with Google";
 
-  const handleGoogleAuth = () => {
+  async function handleGoogleAuth() {
     setLoading(true);
-    // OAuth will be wired to Google provider via server route when credentials are configured
-    router.push("/account");
-  };
+
+    try {
+      if (isProtectedPortal(portal) && mode === "login") {
+        const hint = portalLoginHints[portal];
+        const res = await fetch(`/api/auth/${portal}/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: hint.email,
+            password: "google-demo",
+          }),
+        });
+
+        if (!res.ok) {
+          return;
+        }
+
+        const destination = getSafePortalRedirect(
+          portal,
+          postLoginRedirect ?? authRedirects[portal]
+        );
+        router.push(destination);
+        router.refresh();
+        return;
+      }
+
+      router.push(redirectTo);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <button

@@ -17,19 +17,19 @@ export function HeroSection() {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Left Content */}
           <div className="text-white">
-            <span className="inline-block bg-coral/20 text-coral text-xs font-semibold px-3 py-1 rounded-full mb-4">
+            <span className="inline-block bg-brand/20 text-brand text-xs font-semibold px-3 py-1 rounded-full mb-4">
               ✦ Trending
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4">
               YOUR GO-TO
               <br />
-              <span className="text-coral">STORE,</span>
+              <span className="text-brand">STORE,</span>
             </h1>
             <p className="text-white/70 text-base md:text-lg mb-8 max-w-md">
               Discover premium products at unbeatable prices. Fresh groceries,
               wellness essentials, and everyday needs delivered to your door.
             </p>
-            <Button className="bg-coral hover:bg-coral-dark text-white rounded-full px-8 h-12 text-base font-semibold gap-2">
+            <Button className="bg-brand hover:bg-brand-dark text-white rounded-full px-8 h-12 text-base font-semibold gap-2">
               Start Shopping
               <ArrowRight className="size-4" />
             </Button>

@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  VENDOR
+  SUPPORT
+  CUSTOMER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum ProductStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  password  String
+  name      String
+  role      Role
+  storeName String?
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime   @default(now()) @db.Date
+  products  Product[]
+
+  @@index([role])
+}
+
+model Product {
+  id            String        @id @default(cuid())
+  vendorId      String
+  vendor        User          @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  name          String
+  category      String
+  price         Int
+  originalPrice Int
+  image         String
+  rating        Float         @default(0)
+  discount      String        @default("")
+  stock         Int
+  status        ProductStatus @default(PENDING)
+  submittedAt   DateTime      @default(now()) @db.Date
+  reviewedAt    DateTime?     @db.Date
+
+  @@index([vendorId])
+  @@index([status])
+}

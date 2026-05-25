@@ -1,18 +1,45 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import type { AuthPortal } from "@/data/auth";
+import { isProtectedPortal, loginRoutes } from "@/data/auth";
 
-export function LogoutContent() {
+interface LogoutContentProps {
+  redirectTo?: string;
+  cancelHref?: string;
+  description?: string;
+  portal?: AuthPortal;
+}
+
+export function LogoutContent({
+  redirectTo = "/login",
+  cancelHref = "/account",
+  description = "Are you sure you want to log out of your account? You will need to sign in again to access your orders and settings.",
+  portal = "customer",
+}: LogoutContentProps) {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
-  const handleLogout = () => {
-    router.push("/login");
-  };
+  async function handleLogout() {
+    setLoading(true);
+    try {
+      if (isProtectedPortal(portal)) {
+        await fetch(`/api/auth/${portal}/logout`, { method: "POST" });
+        router.push(loginRoutes[portal]);
+        router.refresh();
+        return;
+      }
+      router.push(redirectTo);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <section className="py-16 md:py-20">
@@ -23,14 +50,11 @@ export function LogoutContent() {
           </div>
 
           <h2 className="text-xl font-bold text-foreground mb-2">Logout</h2>
-          <p className="text-sm text-muted-foreground mb-8">
-            Are you sure you want to log out of your account? You will need to
-            sign in again to access your orders and settings.
-          </p>
+          <p className="text-sm text-muted-foreground mb-8">{description}</p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
-              href="/account"
+              href={cancelHref}
               className={cn(
                 buttonVariants({ variant: "outline" }),
                 "rounded-lg h-11 px-8 text-sm font-semibold"
@@ -41,9 +65,10 @@ export function LogoutContent() {
             <Button
               type="button"
               onClick={handleLogout}
+              disabled={loading}
               className="bg-forest hover:bg-forest-dark text-white rounded-lg h-11 px-8 text-sm font-semibold"
             >
-              Confirm Logout
+              {loading ? "Logging out..." : "Confirm Logout"}
             </Button>
           </div>
         </div>

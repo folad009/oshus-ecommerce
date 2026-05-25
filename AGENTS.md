@@ -9,7 +9,7 @@ Think like a senior full-stack developer.
 Project Name: Oshus Store
 
 Description:
-This is a modern e-commerce platform built to manage online product sales, customer interactions, inventory, payments, and order fulfillment. The platform supports multiple user roles including customers, admins, and support agents.
+This is a modern e-commerce platform built to manage online product sales, customer interactions, inventory, payments, and order fulfillment. The platform supports multiple user roles including customers, admins, vendors and support agents.
 
 Primary Goals:
 - Deliver a fast and responsive shopping experience

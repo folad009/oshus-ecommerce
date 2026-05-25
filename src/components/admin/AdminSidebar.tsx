@@ -7,6 +7,7 @@ import {
   Package,
   ShoppingBag,
   Users,
+  UserCog,
   Settings,
   Truck,
   LogOut,
@@ -15,12 +16,14 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { adminNavItems } from "@/data/admin";
+import { Logo } from "@/components/Logo";
 
 const iconMap = {
   "layout-dashboard": LayoutDashboard,
   package: Package,
   "shopping-bag": ShoppingBag,
   users: Users,
+  "user-cog": UserCog,
   truck: Truck,
   settings: Settings,
 } as const;
@@ -35,14 +38,13 @@ export function AdminSidebar({ open, onClose }: AdminSidebarProps) {
 
   const navContent = (
     <>
-      <div className="flex items-center gap-2 px-5 py-6 border-b border-white/10">
-        <div className="size-9 bg-coral rounded-lg flex items-center justify-center shrink-0">
-          <span className="text-white font-bold text-sm">O</span>
-        </div>
-        <div>
-          <p className="font-bold text-white text-sm">Oshus Store</p>
-          <p className="text-white/50 text-xs">Admin Panel</p>
-        </div>
+      <div className="px-5 py-6 border-b border-white/10">
+        <Logo
+          size="sm"
+          textClassName="text-white"
+          accentClassName="text-brand"
+        />
+        <p className="text-white/50 text-xs mt-2">Admin Panel</p>
       </div>
 
       <nav className="flex flex-col gap-1 p-4 flex-1">
@@ -61,7 +63,7 @@ export function AdminSidebar({ open, onClose }: AdminSidebarProps) {
               className={cn(
                 "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-coral text-white"
+                  ? "bg-brand text-white"
                   : "text-white/70 hover:bg-white/10 hover:text-white"
               )}
             >
@@ -80,7 +82,7 @@ export function AdminSidebar({ open, onClose }: AdminSidebarProps) {
           View Store
         </Link>
         <Link
-          href="/logout"
+          href="/logout/admin"
           className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
         >
           <LogOut className="size-4" />

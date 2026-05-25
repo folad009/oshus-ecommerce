@@ -1,3 +1,9 @@
+export const adminProfile = {
+  name: "Admin User",
+  email: "admin@oshusstore.com",
+  role: "Administrator",
+};
+
 export type OrderStatus =
   | "pending"
   | "processing"
@@ -123,6 +129,7 @@ export const adminNavItems = [
     icon: "truck" as const,
   },
   { label: "Customers", href: "/admin/customers", icon: "users" as const },
+  { label: "Staff", href: "/admin/staff", icon: "user-cog" as const },
   { label: "Settings", href: "/admin/settings", icon: "settings" as const },
 ] as const;
 

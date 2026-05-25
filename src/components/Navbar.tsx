@@ -7,6 +7,7 @@ import { Search, ShoppingCart, Heart, User, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { Logo } from "@/components/Logo";
 import { navLinks } from "@/data/navigation";
 
 export function Navbar() {
@@ -18,14 +19,8 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16 gap-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div className="size-9 bg-navy rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">O</span>
-            </div>
-            <span className="text-navy font-bold text-xl hidden sm:block">
-              Oshus<span className="text-coral">Store</span>
-            </span>
-          </Link>
+          <Logo size="md" className="hidden sm:flex" />
+          <Logo size="sm" showText={false} className="sm:hidden" />
 
           {/* Nav Links - Desktop */}
           <div className="hidden lg:flex items-center gap-6">
@@ -36,8 +31,8 @@ export function Navbar() {
                 className={cn(
                   "text-sm font-medium transition-colors",
                   pathname === link.href
-                    ? "text-coral"
-                    : "text-navy hover:text-coral"
+                    ? "text-brand"
+                    : "text-navy hover:text-brand"
                 )}
               >
                 {link.label}
@@ -63,18 +58,18 @@ export function Navbar() {
 
           {/* Right Icons */}
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" className="hidden sm:flex text-navy hover:text-coral">
+            <Button variant="ghost" size="icon" className="hidden sm:flex text-navy hover:text-brand">
               <Heart />
             </Button>
             <Link
               href="/cart"
               className={cn(
                 buttonVariants({ variant: "ghost", size: "icon" }),
-                "relative text-navy hover:text-coral"
+                "relative text-navy hover:text-brand"
               )}
             >
               <ShoppingCart />
-              <span className="absolute -top-0.5 -right-0.5 bg-coral text-white text-[10px] font-bold rounded-full size-4 flex items-center justify-center">
+              <span className="absolute -top-0.5 -right-0.5 bg-brand text-white text-[10px] font-bold rounded-full size-4 flex items-center justify-center">
                 3
               </span>
             </Link>
@@ -82,7 +77,7 @@ export function Navbar() {
               href="/account"
               className={cn(
                 buttonVariants({ variant: "ghost", size: "icon" }),
-                pathname === "/account" ? "text-coral" : "text-navy hover:text-coral"
+                pathname === "/account" ? "text-brand" : "text-navy hover:text-brand"
               )}
             >
               <User />
@@ -121,7 +116,7 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-sm font-medium text-navy hover:text-coral px-2 py-2 rounded-md hover:bg-light-gray transition-colors"
+                  className="text-sm font-medium text-navy hover:text-brand px-2 py-2 rounded-md hover:bg-light-gray transition-colors"
                   onClick={() => setMobileOpen(false)}
                 >
                   {link.label}

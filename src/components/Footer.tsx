@@ -3,6 +3,7 @@ import { Globe, MessageCircle, Send, Play, MapPin, Phone, Mail } from "lucide-re
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Logo } from "@/components/Logo";
 
 export function Footer() {
   return (
@@ -11,14 +12,12 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="size-9 bg-coral rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">O</span>
-              </div>
-              <span className="font-bold text-xl">
-                Oshus<span className="text-coral">Store</span>
-              </span>
-            </div>
+            <Logo
+              size="xl"
+              className="mb-4 gap-3"
+              textClassName="text-white"
+              accentClassName="text-brand"
+            />
             <p className="text-white/60 text-sm mb-4 max-w-xs">
               Your trusted online store for premium products, delivered fresh to
               your doorstep.
@@ -27,7 +26,7 @@ export function Footer() {
               {[Globe, MessageCircle, Send, Play].map((Icon, i) => (
                 <button
                   key={i}
-                  className="size-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-coral transition-colors"
+                  className="size-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-brand transition-colors"
                 >
                   <Icon className="size-4" />
                 </button>
@@ -49,7 +48,7 @@ export function Footer() {
                 <Link
                   key={link.label}
                   href={link.href}
-                  className="text-white/60 text-sm hover:text-coral transition-colors"
+                  className="text-white/60 text-sm hover:text-brand transition-colors"
                 >
                   {link.label}
                 </Link>
@@ -73,7 +72,7 @@ export function Footer() {
                 <Link
                   key={link.label}
                   href={link.href}
-                  className="text-white/60 text-sm hover:text-coral transition-colors"
+                  className="text-white/60 text-sm hover:text-brand transition-colors"
                 >
                   {link.label}
                 </Link>
@@ -92,7 +91,7 @@ export function Footer() {
                 placeholder="Your email"
                 className="bg-white/10 border-0 text-white placeholder:text-white/40 rounded-lg h-9 text-sm flex-1"
               />
-              <Button className="bg-coral hover:bg-coral-dark text-white rounded-lg h-9 px-4 text-sm font-semibold shrink-0">
+              <Button className="bg-brand hover:bg-brand-dark text-white rounded-lg h-9 px-4 text-sm font-semibold shrink-0">
                 Join
               </Button>
             </div>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { AuthPageHeader } from "@/components/auth/AuthPageHeader";
 import { AuthSplitPanel } from "@/components/auth/AuthSplitPanel";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { AuthPortalLinks } from "@/components/auth/AuthPortalLinks";
 import { AuthFeaturesBar } from "@/components/auth/AuthFeaturesBar";
 import { Footer } from "@/components/Footer";
 
@@ -19,7 +20,8 @@ export default function LoginPage() {
           heading="Welcome Back"
           description="Sign in to manage your orders, track deliveries, and enjoy a faster checkout experience."
         >
-          <LoginForm />
+          <AuthPortalLinks activePortal="customer" />
+          <LoginForm portal="customer" />
         </AuthSplitPanel>
         <AuthFeaturesBar />
       </main>

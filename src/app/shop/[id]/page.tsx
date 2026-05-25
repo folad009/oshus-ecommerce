@@ -10,6 +10,8 @@ interface ProductPageProps {
   params: Promise<{ id: string }>;
 }
 
+export const dynamicParams = true;
+
 export function generateStaticParams() {
   return shopProducts.map((product) => ({ id: product.id }));
 }
@@ -18,7 +20,7 @@ export async function generateMetadata({
   params,
 }: ProductPageProps): Promise<Metadata> {
   const { id } = await params;
-  const product = getProductDetail(id);
+  const product = await getProductDetail(id);
 
   return {
     title: product

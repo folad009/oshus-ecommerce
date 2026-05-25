@@ -12,11 +12,13 @@ interface ProductDetailContentProps {
   productId: string;
 }
 
-export function ProductDetailContent({ productId }: ProductDetailContentProps) {
-  const product = getProductDetail(productId);
+export async function ProductDetailContent({
+  productId,
+}: ProductDetailContentProps) {
+  const product = await getProductDetail(productId);
   if (!product) notFound();
 
-  const related = getRelatedProducts(product.id, product.category);
+  const related = await getRelatedProducts(product.id, product.category);
 
   return (
     <>

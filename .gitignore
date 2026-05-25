@@ -20,6 +20,10 @@
 # production
 /build
 
+# local staff account store (seeded from src/data/staff-accounts.ts)
+/data/staff-accounts-store.json
+/data/catalog-products-store.json
+
 # misc
 .DS_Store
 *.pem
