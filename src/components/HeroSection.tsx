@@ -42,7 +42,7 @@ export function HeroSection() {
               <div className="col-span-2 row-span-2 relative rounded-lg overflow-hidden h-64">
                 <Image
                   src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&h=400&fit=crop"
-                  alt="Fresh groceries"
+                  alt="Fresh groceries from oshus store"
                   fill
                   className="object-cover"
                   priority
