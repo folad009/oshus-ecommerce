@@ -47,11 +47,6 @@ export function LoginForm({
       return;
     }
 
-    if (!isStaff) {
-      router.push(redirectTo);
-      return;
-    }
-
     setLoading(true);
     try {
       const res = await fetch(`/api/auth/${portal}/login`, {
@@ -70,10 +65,12 @@ export function LoginForm({
         return;
       }
 
-      const destination = getSafePortalRedirect(
-        portal,
-        postLoginRedirect ?? data.redirectTo
-      );
+      const destination = isStaff
+        ? getSafePortalRedirect(
+            portal,
+            postLoginRedirect ?? data.redirectTo
+          )
+        : (postLoginRedirect ?? data.redirectTo ?? redirectTo);
       router.push(destination);
       router.refresh();
     } catch {

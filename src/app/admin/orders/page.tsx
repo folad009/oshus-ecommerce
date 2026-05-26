@@ -1,5 +1,5 @@
 import { AdminShell } from "@/components/admin/AdminShell";
-import { OrdersTable } from "@/components/admin/OrdersTable";
+import { AdminOrdersPanel } from "@/components/admin/AdminOrdersPanel";
 
 export default function AdminOrdersPage() {
   return (
@@ -7,7 +7,7 @@ export default function AdminOrdersPage() {
       title="Orders"
       subtitle="View and manage customer orders"
     >
-      <OrdersTable />
+      <AdminOrdersPanel />
     </AdminShell>
   );
 }

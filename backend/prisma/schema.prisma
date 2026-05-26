@@ -25,16 +25,40 @@ enum ProductStatus {
   REJECTED
 }
 
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum TicketPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
 model User {
-  id        String     @id @default(cuid())
-  email     String     @unique
-  password  String
-  name      String
-  role      Role
-  storeName String?
-  status    UserStatus @default(ACTIVE)
-  createdAt DateTime   @default(now()) @db.Date
-  products  Product[]
+  id           String         @id @default(cuid())
+  email        String         @unique
+  password     String
+  name         String
+  role         Role
+  storeName    String?
+  status       UserStatus     @default(ACTIVE)
+  createdAt    DateTime       @default(now()) @db.Date
+  products     Product[]
+  orders       Order[]        @relation("CustomerOrders")
+  vendorItems  OrderItem[]    @relation("VendorOrderItems")
+  tickets      SupportTicket[]
 
   @@index([role])
 }
@@ -54,7 +78,66 @@ model Product {
   status        ProductStatus @default(PENDING)
   submittedAt   DateTime      @default(now()) @db.Date
   reviewedAt    DateTime?     @db.Date
+  orderItems    OrderItem[]
 
   @@index([vendorId])
+  @@index([status])
+}
+
+model Order {
+  id                String      @id @default(cuid())
+  orderNumber       String      @unique
+  customerId        String?
+  customer          User?       @relation("CustomerOrders", fields: [customerId], references: [id], onDelete: SetNull)
+  customerName      String
+  customerEmail     String
+  customerPhone     String      @default("")
+  status            OrderStatus @default(PENDING)
+  total             Int
+  itemCount         Int
+  paymentMethod     String      @default("Paystack")
+  orderDate         DateTime    @default(now()) @db.Date
+  shippingAddress   String      @default("")
+  carrier           String      @default("GIG Logistics")
+  trackingNumber    String?
+  estimatedDelivery String?
+  items             OrderItem[]
+  createdAt         DateTime    @default(now())
+
+  @@index([status])
+  @@index([customerEmail])
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  vendorId  String?
+  vendor    User?    @relation("VendorOrderItems", fields: [vendorId], references: [id], onDelete: SetNull)
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  name      String
+  sku       String   @default("")
+  quantity  Int
+  unitPrice Int
+  image     String?
+
+  @@index([orderId])
+  @@index([vendorId])
+}
+
+model SupportTicket {
+  id            String         @id @default(cuid())
+  ticketNumber  String         @unique
+  subject       String
+  customerName  String
+  customerEmail String
+  customerId    String?
+  customer      User?          @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  priority      TicketPriority @default(MEDIUM)
+  status        TicketStatus   @default(OPEN)
+  orderNumber   String?
+  createdAt     DateTime       @default(now())
+
   @@index([status])
 }

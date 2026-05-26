@@ -1,5 +1,5 @@
 import { SupportShell } from "@/components/support/SupportShell";
-import { CustomersTable } from "@/components/support/CustomersTable";
+import { SupportCustomersPanel } from "@/components/support/SupportCustomersPanel";
 
 export default function SupportCustomersPage() {
   return (
@@ -7,7 +7,7 @@ export default function SupportCustomersPage() {
       title="Customers"
       subtitle="Customers with support history"
     >
-      <CustomersTable />
+      <SupportCustomersPanel />
     </SupportShell>
   );
 }

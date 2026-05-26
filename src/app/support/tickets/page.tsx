@@ -1,5 +1,5 @@
 import { SupportShell } from "@/components/support/SupportShell";
-import { TicketsTable } from "@/components/support/TicketsTable";
+import { SupportTicketsPanel } from "@/components/support/SupportTicketsPanel";
 
 export default function SupportTicketsPage() {
   return (
@@ -7,7 +7,7 @@ export default function SupportTicketsPage() {
       title="Tickets"
       subtitle="View and respond to customer support tickets"
     >
-      <TicketsTable />
+      <SupportTicketsPanel />
     </SupportShell>
   );
 }

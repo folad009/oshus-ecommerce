@@ -1,24 +1,17 @@
 import { notFound } from "next/navigation";
 import { SupportShell } from "@/components/support/SupportShell";
 import { TrackOrderDetail } from "@/components/track-order/TrackOrderDetail";
-import {
-  getAdminTracking,
-  getAllTrackableOrderSlugs,
-} from "@/data/admin-track-order";
+import { getOrderDetailForPortal } from "@/lib/order-detail-server";
 
 interface SupportTrackOrderDetailPageProps {
   params: Promise<{ id: string }>;
-}
-
-export function generateStaticParams() {
-  return getAllTrackableOrderSlugs().map((id) => ({ id }));
 }
 
 export default async function SupportTrackOrderDetailPage({
   params,
 }: SupportTrackOrderDetailPageProps) {
   const { id } = await params;
-  const order = getAdminTracking(id);
+  const order = await getOrderDetailForPortal("support", id);
 
   if (!order) {
     notFound();

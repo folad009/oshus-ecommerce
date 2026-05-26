@@ -29,12 +29,20 @@ export function LogoutContent({
   async function handleLogout() {
     setLoading(true);
     try {
+      if (portal === "customer") {
+        await fetch("/api/auth/customer/logout", { method: "POST" });
+        router.push(redirectTo);
+        router.refresh();
+        return;
+      }
+
       if (isProtectedPortal(portal)) {
         await fetch(`/api/auth/${portal}/logout`, { method: "POST" });
         router.push(loginRoutes[portal]);
         router.refresh();
         return;
       }
+
       router.push(redirectTo);
     } finally {
       setLoading(false);

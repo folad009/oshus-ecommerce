@@ -11,19 +11,27 @@ interface TrackOrderDetailProps {
   order: AdminTrackingDetail;
   basePath: string;
   showStatusUpdate?: boolean;
+  orderSlug?: string;
+  statusApiPath?: string;
 }
 
 export function TrackOrderDetail({
   order,
   basePath,
   showStatusUpdate = true,
+  orderSlug,
+  statusApiPath = "/api/admin/orders",
 }: TrackOrderDetailProps) {
   return (
     <div className="flex flex-col gap-6">
       <TrackOrderBreadcrumb orderId={order.orderId} basePath={basePath} />
 
-      {showStatusUpdate && (
-        <StatusUpdateBar currentStatus={order.status} />
+      {showStatusUpdate && orderSlug && (
+        <StatusUpdateBar
+          currentStatus={order.status}
+          orderSlug={orderSlug}
+          statusApiPath={statusApiPath}
+        />
       )}
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">

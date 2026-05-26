@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { authRedirects } from "@/data/auth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/auth/PasswordInput";
@@ -12,13 +13,16 @@ import { AuthDivider } from "@/components/auth/AuthDivider";
 export function SignupForm() {
   const router = useRouter();
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
     const form = new FormData(e.currentTarget);
     const password = form.get("password") as string;
     const confirm = form.get("confirmPassword") as string;
+    const name = form.get("name") as string;
+    const email = form.get("email") as string;
 
     if (password !== confirm) {
       setError("Passwords do not match.");
@@ -30,8 +34,29 @@ export function SignupForm() {
       return;
     }
 
-    router.push("/account");
-  };
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/customer/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const data = (await res.json()) as { error?: string };
+
+      if (!res.ok) {
+        setError(data.error ?? "Registration failed. Please try again.");
+        return;
+      }
+
+      router.push(authRedirects.customer);
+      router.refresh();
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div>
@@ -117,9 +142,10 @@ export function SignupForm() {
 
         <Button
           type="submit"
+          disabled={loading}
           className="w-full bg-forest hover:bg-forest-dark text-white rounded-lg h-11 text-sm font-semibold"
         >
-          Sign Up
+          {loading ? "Creating account…" : "Sign Up"}
         </Button>
       </form>
 

@@ -1,15 +1,64 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { checkoutSummary, formatNaira } from "@/data/checkout";
+import { cartItems } from "@/data/cart";
 
 export function PaymentMethods() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handlePay() {
+    if (!email || !name) {
+      setError("Enter your name and email to continue.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: name,
+          customerEmail: email,
+          items: cartItems.map((item) => ({
+            name: item.name,
+            quantity: item.quantity,
+            unitPrice: item.price,
+            image: item.image,
+            productId: item.id.startsWith("cart-") ? undefined : item.id,
+          })),
+        }),
+      });
+
+      const data = (await res.json()) as { error?: string; orderNumber?: string };
+
+      if (!res.ok) {
+        setError(data.error ?? "Could not place order. Please try again.");
+        return;
+      }
+
+      router.push(
+        data.orderNumber
+          ? `/order-completed?order=${encodeURIComponent(data.orderNumber)}`
+          : "/order-completed"
+      );
+    } catch {
+      setError("Could not reach the server. Is the backend running?");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div>
@@ -35,6 +84,30 @@ export function PaymentMethods() {
           We never store your card details.
         </p>
 
+        {error && (
+          <p className="text-sm text-coral mb-4" role="alert">
+            {error}
+          </p>
+        )}
+
+        <div className="mb-5">
+          <label
+            htmlFor="checkout-name"
+            className="text-xs font-medium text-foreground mb-1.5 block"
+          >
+            Full Name
+          </label>
+          <Input
+            id="checkout-name"
+            type="text"
+            placeholder="Ada Okonkwo"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="h-11 rounded-lg"
+            required
+          />
+        </div>
+
         <div className="mb-5">
           <label
             htmlFor="paystack-email"
@@ -58,17 +131,16 @@ export function PaymentMethods() {
           <span>Secured by Paystack. PCI-DSS compliant payments.</span>
         </div>
 
-        <Link
-          href={email ? "/order-completed" : "#"}
-          aria-disabled={!email}
-          className={cn(
-            buttonVariants(),
-            "w-full bg-checkout-green hover:bg-checkout-green-dark text-white rounded-lg h-12 text-sm font-semibold",
-            !email && "pointer-events-none opacity-50"
-          )}
+        <Button
+          type="button"
+          onClick={() => void handlePay()}
+          disabled={loading || !email || !name}
+          className="w-full bg-checkout-green hover:bg-checkout-green-dark text-white rounded-lg h-12 text-sm font-semibold"
         >
-          Pay {formatNaira(checkoutSummary.total)} with Paystack
-        </Link>
+          {loading
+            ? "Processing…"
+            : `Pay ${formatNaira(checkoutSummary.total)} with Paystack`}
+        </Button>
       </div>
     </div>
   );

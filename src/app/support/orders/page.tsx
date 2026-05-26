@@ -1,5 +1,5 @@
 import { SupportShell } from "@/components/support/SupportShell";
-import { OrdersLookupTable } from "@/components/support/OrdersLookupTable";
+import { SupportOrdersPanel } from "@/components/support/SupportOrdersPanel";
 
 export default function SupportOrdersPage() {
   return (
@@ -7,7 +7,7 @@ export default function SupportOrdersPage() {
       title="Orders"
       subtitle="Look up orders to assist customers"
     >
-      <OrdersLookupTable />
+      <SupportOrdersPanel />
     </SupportShell>
   );
 }

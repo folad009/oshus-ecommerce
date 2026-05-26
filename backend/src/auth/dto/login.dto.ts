@@ -9,6 +9,6 @@ export class LoginDto {
   @MinLength(6)
   password!: string;
 
-  @IsIn(["admin", "vendor", "support"])
+  @IsIn(["admin", "vendor", "support", "customer"])
   portal!: PortalRole;
 }

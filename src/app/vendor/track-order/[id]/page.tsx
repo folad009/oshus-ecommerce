@@ -1,24 +1,17 @@
 import { notFound } from "next/navigation";
 import { VendorShell } from "@/components/vendor/VendorShell";
 import { TrackOrderDetail } from "@/components/track-order/TrackOrderDetail";
-import {
-  getAdminTracking,
-  getAllTrackableOrderSlugs,
-} from "@/data/admin-track-order";
+import { getOrderDetailForPortal } from "@/lib/order-detail-server";
 
 interface VendorTrackOrderDetailPageProps {
   params: Promise<{ id: string }>;
-}
-
-export function generateStaticParams() {
-  return getAllTrackableOrderSlugs().map((id) => ({ id }));
 }
 
 export default async function VendorTrackOrderDetailPage({
   params,
 }: VendorTrackOrderDetailPageProps) {
   const { id } = await params;
-  const order = getAdminTracking(id);
+  const order = await getOrderDetailForPortal("vendor", id);
 
   if (!order) {
     notFound();

@@ -1,5 +1,5 @@
 import { jwtVerify } from "jose";
-import type { PortalRole } from "@/lib/portal-session";
+export type SessionPortal = "admin" | "vendor" | "support" | "customer";
 
 interface JwtClaims {
   sub: string;
@@ -7,10 +7,11 @@ interface JwtClaims {
   role: string;
 }
 
-const roleMap: Record<PortalRole, string> = {
+const roleMap: Record<SessionPortal, string> = {
   admin: "ADMIN",
   vendor: "VENDOR",
   support: "SUPPORT",
+  customer: "CUSTOMER",
 };
 
 function getJwtSecret(): Uint8Array {
@@ -20,7 +21,7 @@ function getJwtSecret(): Uint8Array {
 }
 
 export async function verifyJwtForPortal(
-  portal: PortalRole,
+  portal: SessionPortal,
   token: string | undefined
 ): Promise<JwtClaims | null> {
   if (!token) {
