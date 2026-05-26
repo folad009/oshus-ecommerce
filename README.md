@@ -45,6 +45,8 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+If a page (e.g. `/account`) returns 404 in dev, stop all dev servers, then run `npm run dev:clean` and wait for the first compile to finish.
+
 `JWT_SECRET` must match in `backend/.env` and `.env.local`.
 
 ## Demo accounts

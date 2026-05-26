@@ -21,9 +21,9 @@ export function HeroSection() {
               ✦ Trending
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4">
-              WELCOME TO
+              Welcome To
               <br />
-              <span className="text-brand">OSHUS STORE</span>
+              <span className="text-brand">OshusStore</span>
             </h1>
             <p className="text-white/70 text-base md:text-lg mb-8 max-w-md">
               Discover premium products at unbeatable prices. Fresh groceries,
