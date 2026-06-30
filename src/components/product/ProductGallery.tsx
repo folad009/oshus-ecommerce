@@ -19,7 +19,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-light-gray">
+      <div className="relative aspect-4/5 rounded-2xl overflow-hidden bg-light-gray">
         <Image
           src={images[activeIndex]}
           alt={`${productName} - image ${activeIndex + 1}`}
@@ -49,7 +49,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
       <div className="grid grid-cols-4 gap-3">
         {images.map((image, index) => (
           <button
-            key={image}
+            key={`${index}-${image}`}
             type="button"
             onClick={() => setActiveIndex(index)}
             className={cn(

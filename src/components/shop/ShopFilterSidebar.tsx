@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useShopCategories } from "@/hooks/useShopCategories";
 import {
-  shopCategories,
   shopSkinTypes,
   shopPromotions,
   shopAvailability,
@@ -101,6 +101,7 @@ export function ShopFilterSidebar({
   priceRange,
   onPriceChange,
 }: ShopFilterSidebarProps) {
+  const { categories } = useShopCategories();
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   return (
@@ -113,23 +114,23 @@ export function ShopFilterSidebar({
             By Categories
           </h3>
           <ul className="flex flex-col gap-2">
-            {shopCategories.map((category) => (
-              <li key={category}>
+            {categories.map((category) => (
+              <li key={category.id}>
                 <button
                   type="button"
                   onClick={() =>
                     setActiveCategory(
-                      activeCategory === category ? null : category
+                      activeCategory === category.name ? null : category.name
                     )
                   }
                   className={cn(
                     "text-sm transition-colors text-left w-full",
-                    activeCategory === category
+                    activeCategory === category.name
                       ? "text-forest font-medium"
                       : "text-foreground/70 hover:text-forest"
                   )}
                 >
-                  {category}
+                  {category.name}
                 </button>
               </li>
             ))}

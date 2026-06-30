@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { OrderCompletedPageHeader } from "@/components/order/OrderCompletedPageHeader";
 import { OrderSuccessSection } from "@/components/order/OrderSuccessSection";
-import { OrderInfoBanner } from "@/components/order/OrderInfoBanner";
-import { OrderDetailsCard } from "@/components/order/OrderDetailsCard";
+import { OrderCompletedContent } from "@/components/order/OrderCompletedContent";
 import { ShopFeaturesBar } from "@/components/shop/ShopFeaturesBar";
 import { OrderCompletedNewsletter } from "@/components/order/OrderCompletedNewsletter";
 import { Footer } from "@/components/Footer";
@@ -18,8 +17,7 @@ export default function OrderCompletedPage() {
       <main className="flex-1 bg-white">
         <OrderCompletedPageHeader />
         <OrderSuccessSection />
-        <OrderInfoBanner />
-        <OrderDetailsCard />
+        <OrderCompletedContent />
         <ShopFeaturesBar iconVariant="yellow" />
         <OrderCompletedNewsletter />
       </main>

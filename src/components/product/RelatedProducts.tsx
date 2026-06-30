@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ShopProductCard } from "@/components/shop/ShopProductCard";
 import type { ShopProduct } from "@/types";
 
@@ -21,12 +20,11 @@ export function RelatedProducts({ products }: RelatedProductsProps) {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {products.map((product, index) => (
-            <Link key={product.id} href={`/shop/${product.id}`}>
-              <ShopProductCard
-                product={product}
-                showHoverActions={index === 0}
-              />
-            </Link>
+            <ShopProductCard
+              key={product.id}
+              product={product}
+              showHoverActions={index === 0}
+            />
           ))}
         </div>
       </div>

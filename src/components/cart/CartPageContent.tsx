@@ -1,48 +1,42 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import { Minus, Plus, X } from "lucide-react";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { OrderSummary } from "@/components/cart/OrderSummary";
-import { cartItems as initialItems, cartSummary } from "@/data/cart";
 import { formatNaira } from "@/lib/currency";
-import type { CartItem } from "@/types";
+import { useCart } from "@/store/cart-provider";
 
 export function CartPageContent() {
-  const [items, setItems] = useState<CartItem[]>(initialItems);
-  const [couponCode, setCouponCode] = useState("");
+  const {
+    items,
+    hydrated,
+    itemCount,
+    subtotal,
+    shipping,
+    taxes,
+    couponDiscount,
+    total,
+    updateQuantity,
+    removeItem,
+    clearCart,
+  } = useCart();
 
-  const updateQuantity = (id: string, delta: number) => {
-    setItems((prev) =>
-      prev
-        .map((item) =>
-          item.id === id
-            ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
+  const lineSubtotal = (price: number, quantity: number) => price * quantity;
+
+  if (!hydrated) {
+    return (
+      <section className="py-8 md:py-10">
+        <div className="max-w-7xl mx-auto px-4">
+          <p className="text-sm text-muted-foreground text-center py-12">
+            Loading cart...
+          </p>
+        </div>
+      </section>
     );
-  };
-
-  const removeItem = (id: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  const clearCart = () => setItems([]);
-
-  const lineSubtotal = (item: CartItem) => item.price * item.quantity;
-  const calculatedSubtotal = items.reduce(
-    (sum, item) => sum + lineSubtotal(item),
-    0
-  );
-  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
-  const total =
-    calculatedSubtotal -
-    cartSummary.couponDiscount +
-    cartSummary.shipping +
-    cartSummary.taxes;
+  }
 
   return (
     <section className="py-8 md:py-10">
@@ -75,7 +69,10 @@ export function CartPageContent() {
                         colSpan={5}
                         className="py-12 text-center text-sm text-muted-foreground"
                       >
-                        Your cart is empty.
+                        Your cart is empty.{" "}
+                        <Link href="/shop" className="text-forest underline">
+                          Continue shopping
+                        </Link>
                       </td>
                     </tr>
                   ) : (
@@ -102,6 +99,7 @@ export function CartPageContent() {
                                 alt={item.name}
                                 fill
                                 className="object-cover"
+                                sizes="64px"
                               />
                             </div>
                             <div>
@@ -121,7 +119,9 @@ export function CartPageContent() {
                           <div className="flex items-center justify-center gap-2">
                             <button
                               type="button"
-                              onClick={() => updateQuantity(item.id, -1)}
+                              onClick={() =>
+                                updateQuantity(item.id, item.quantity - 1)
+                              }
                               className="size-8 rounded-lg border border-border flex items-center justify-center hover:bg-light-gray transition-colors"
                               aria-label="Decrease quantity"
                             >
@@ -132,7 +132,9 @@ export function CartPageContent() {
                             </span>
                             <button
                               type="button"
-                              onClick={() => updateQuantity(item.id, 1)}
+                              onClick={() =>
+                                updateQuantity(item.id, item.quantity + 1)
+                              }
                               className="size-8 rounded-lg border border-border flex items-center justify-center hover:bg-light-gray transition-colors"
                               aria-label="Increase quantity"
                             >
@@ -141,7 +143,7 @@ export function CartPageContent() {
                           </div>
                         </td>
                         <td className="py-4 px-4 text-sm font-semibold text-foreground text-right align-middle">
-                          {formatNaira(lineSubtotal(item))}
+                          {formatNaira(lineSubtotal(item.price, item.quantity))}
                         </td>
                       </tr>
                     ))
@@ -150,20 +152,22 @@ export function CartPageContent() {
               </table>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-6">
-              <div className="flex items-center gap-2 flex-1 max-w-md">
-                <Input
-                  type="text"
-                  placeholder="Coupon Code"
-                  value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value)}
-                  className="rounded-xl h-11 bg-white border-border"
-                />
-                <Button className="bg-forest hover:bg-forest-dark text-white rounded-xl h-11 px-5 text-sm font-semibold shrink-0">
-                  Apply Coupon
-                </Button>
-              </div>
-              {items.length > 0 && (
+            {items.length > 0 && (
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-6">
+                <div className="flex items-center gap-2 flex-1 max-w-md">
+                  <Input
+                    type="text"
+                    placeholder="Coupon Code"
+                    disabled
+                    className="rounded-xl h-11 bg-white border-border"
+                  />
+                  <Button
+                    disabled
+                    className="bg-forest hover:bg-forest-dark text-white rounded-xl h-11 px-5 text-sm font-semibold shrink-0"
+                  >
+                    Apply Coupon
+                  </Button>
+                </div>
                 <button
                   type="button"
                   onClick={clearCart}
@@ -171,20 +175,19 @@ export function CartPageContent() {
                 >
                   Clear Shopping Cart
                 </button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           <div className="w-full lg:w-[320px] shrink-0">
             <OrderSummary
-              itemCount={itemCount || cartSummary.itemCount}
-              subtotal={
-                items.length > 0 ? calculatedSubtotal : cartSummary.subtotal
-              }
-              shipping={cartSummary.shipping}
-              taxes={cartSummary.taxes}
-              couponDiscount={cartSummary.couponDiscount}
-              total={items.length > 0 ? total : cartSummary.total}
+              itemCount={itemCount}
+              subtotal={subtotal}
+              shipping={shipping}
+              taxes={taxes}
+              couponDiscount={couponDiscount}
+              total={total}
+              checkoutDisabled={items.length === 0}
             />
           </div>
         </div>

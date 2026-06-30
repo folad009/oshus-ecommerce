@@ -1,8 +1,11 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, Expand, ShoppingBag, Star } from "lucide-react";
 import type { ShopProduct } from "@/types";
 import { formatNaira } from "@/lib/currency";
+import { useCart } from "@/store/cart-provider";
 
 interface ShopProductCardProps {
   product: ShopProduct;
@@ -13,24 +16,40 @@ export function ShopProductCard({
   product,
   showHoverActions = false,
 }: ShopProductCardProps) {
+  const { addItem } = useCart();
+
+  function handleAddToCart(event: React.MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    addItem({
+      id: product.id,
+      name: product.name,
+      category: product.category,
+      price: product.price,
+      image: product.image,
+    });
+  }
+
   return (
     <article className="group flex flex-col">
-      <Link
-        href={`/shop/${product.id}`}
-        className="relative aspect-[4/5] rounded-xl overflow-hidden bg-light-gray mb-3 block"
-      >
-        <Image
-          src={product.image}
-          alt={product.name}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-500"
-          sizes="(max-width: 768px) 100vw, 33vw"
-        />
-        <span className="absolute top-3 left-3 bg-forest text-white text-[10px] font-semibold px-2 py-0.5 rounded">
+      <div className="relative aspect-4/5 rounded-xl overflow-hidden bg-light-gray mb-3">
+        <Link
+          href={`/shop/${product.id}`}
+          className="block absolute inset-0"
+        >
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            sizes="(max-width: 768px) 100vw, 33vw"
+          />
+        </Link>
+        <span className="absolute top-3 left-3 bg-forest text-white text-[10px] font-semibold px-2 py-0.5 rounded z-10 pointer-events-none">
           {product.discount}
         </span>
         {showHoverActions && (
-          <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/10">
+          <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/10 z-10">
             <button
               type="button"
               className="size-9 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-forest hover:text-white transition-colors"
@@ -38,15 +57,16 @@ export function ShopProductCard({
             >
               <Heart className="size-4" />
             </button>
-            <button
-              type="button"
+            <Link
+              href={`/shop/${product.id}`}
               className="size-9 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-forest hover:text-white transition-colors"
               aria-label="Quick view"
             >
               <Expand className="size-4" />
-            </button>
+            </Link>
             <button
               type="button"
+              onClick={handleAddToCart}
               className="size-9 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-forest hover:text-white transition-colors"
               aria-label="Add to cart"
             >
@@ -54,7 +74,7 @@ export function ShopProductCard({
             </button>
           </div>
         )}
-      </Link>
+      </div>
 
       <div className="flex items-center justify-between mb-1.5">
         <span className="text-xs text-muted-foreground">{product.category}</span>

@@ -63,6 +63,28 @@ If a page (e.g. `/account`) returns 404 in dev, stop all dev servers, then run `
 - Those routes proxy to the NestJS backend (`BACKEND_URL`).
 - JWTs are stored in httpOnly cookies and verified by the Next.js proxy and NestJS guards.
 
+## Payments & delivery
+
+Checkout supports **Paystack** and **OPay**, with **Kwik** for last-mile delivery quotes and booking.
+
+Sandbox mode is enabled by default in `backend/.env.example`. Copy those vars to `backend/.env` and run migrations after pulling:
+
+```bash
+cd backend && npm run prisma:migrate
+```
+
+| Service   | Sandbox env flag        | Get real test keys from                          |
+|-----------|---------------------------|--------------------------------------------------|
+| Paystack  | `PAYMENTS_SANDBOX=true`   | [Paystack Dashboard](https://dashboard.paystack.com) |
+| OPay      | `PAYMENTS_SANDBOX=true`   | [OPay Merchant](https://documentation.opaycheckout.com) |
+| Kwik      | `KWIK_SANDBOX=true`       | [Kwik corporate signup](https://kwik.delivery) (email plugin@kwik.delivery to enable API) |
+
+**Checkout flow:** cart → checkout → enter address → **Get Kwik Delivery Quote** → choose Paystack or OPay → pay → order completed.
+
+## Product images (Cloudinary)
+
+Admin, support, and vendor product forms upload up to **4 images** via Cloudinary. With `CLOUDINARY_SANDBOX=true`, uploads use placeholder URLs until you add real Cloudinary credentials to `backend/.env`.
+
 ## Scripts
 
 | Command            | Description              |

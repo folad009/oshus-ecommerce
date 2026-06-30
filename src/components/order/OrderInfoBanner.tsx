@@ -1,8 +1,23 @@
 import { Button } from "@/components/ui/button";
-import { completedOrder } from "@/data/order-completed";
+import type { CompletedOrderSnapshot } from "@/lib/completed-order-storage";
 
-export function OrderInfoBanner() {
-  const { orderId, paymentMethod, transactionId, deliveryDate } = completedOrder;
+interface OrderInfoBannerProps {
+  order: CompletedOrderSnapshot;
+}
+
+function formatDeliveryDate(placedAt: string) {
+  const date = new Date(placedAt);
+  date.setDate(date.getDate() + 5);
+  return date.toLocaleDateString("en-NG", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+export function OrderInfoBanner({ order }: OrderInfoBannerProps) {
+  const { orderNumber, placedAt } = order;
 
   return (
     <section className="max-w-7xl mx-auto px-4 -mt-2 mb-8">
@@ -10,19 +25,23 @@ export function OrderInfoBanner() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 flex-1">
           <div>
             <p className="text-xs text-white/70 mb-1">Order ID</p>
-            <p className="text-sm font-semibold text-white">{orderId}</p>
+            <p className="text-sm font-semibold text-white">{orderNumber}</p>
           </div>
           <div>
             <p className="text-xs text-white/70 mb-1">Payment Method</p>
-            <p className="text-sm font-semibold text-white">{paymentMethod}</p>
+            <p className="text-sm font-semibold text-white">Paystack</p>
           </div>
           <div>
-            <p className="text-xs text-white/70 mb-1">Transaction ID</p>
-            <p className="text-sm font-semibold text-white">{transactionId}</p>
+            <p className="text-xs text-white/70 mb-1">Customer Email</p>
+            <p className="text-sm font-semibold text-white truncate">
+              {order.customerEmail}
+            </p>
           </div>
           <div>
             <p className="text-xs text-white/70 mb-1">Estimated Delivery Date</p>
-            <p className="text-sm font-semibold text-white">{deliveryDate}</p>
+            <p className="text-sm font-semibold text-white">
+              {formatDeliveryDate(placedAt)}
+            </p>
           </div>
         </div>
         <Button

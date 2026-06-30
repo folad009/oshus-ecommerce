@@ -7,18 +7,21 @@ import { cn } from "@/lib/utils";
 import { formatNaira } from "@/lib/currency";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { shopCategories } from "@/data/shop";
+import { useShopCategories } from "@/hooks/useShopCategories";
 import {
   productApprovalStatusStyles,
   type CatalogProduct,
 } from "@/data/catalog-products";
+import { ProductImageUpload } from "@/components/products/ProductImageUpload";
 
 export function VendorProductsPanel() {
+  const { categories } = useShopCategories();
   const [products, setProducts] = useState<CatalogProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [images, setImages] = useState<string[]>([]);
 
   const loadProducts = useCallback(async () => {
     setLoading(true);
@@ -58,8 +61,13 @@ export function VendorProductsPanel() {
     const category = form.get("category") as string;
     const price = Number(form.get("price"));
     const originalPrice = Number(form.get("originalPrice") || form.get("price"));
-    const image = form.get("image") as string;
     const stock = Number(form.get("stock"));
+
+    if (images.length === 0) {
+      setError("Upload at least one product image.");
+      setSubmitting(false);
+      return;
+    }
 
     try {
       const res = await fetch("/api/vendor/products", {
@@ -70,7 +78,7 @@ export function VendorProductsPanel() {
           category,
           price,
           originalPrice,
-          image,
+          images,
           stock,
         }),
       });
@@ -87,6 +95,7 @@ export function VendorProductsPanel() {
           "Product submitted. An admin must approve it before it appears in the store."
       );
       e.currentTarget.reset();
+      setImages([]);
       await loadProducts();
     } catch {
       setError("Failed to submit product.");
@@ -146,9 +155,9 @@ export function VendorProductsPanel() {
               className="flex h-11 w-full rounded-lg border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
             >
               <option value="">Select category</option>
-              {shopCategories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
+              {categories.map((category) => (
+                <option key={category.id} value={category.name}>
+                  {category.name}
                 </option>
               ))}
             </select>
@@ -203,22 +212,11 @@ export function VendorProductsPanel() {
               className="h-11 rounded-lg"
             />
           </div>
-          <div className="md:col-span-2">
-            <label
-              htmlFor="product-image"
-              className="text-sm font-medium text-foreground mb-1.5 block"
-            >
-              Image URL <span className="text-coral">*</span>
-            </label>
-            <Input
-              id="product-image"
-              name="image"
-              type="url"
-              required
-              placeholder="https://images.unsplash.com/..."
-              className="h-11 rounded-lg"
-            />
-          </div>
+          <ProductImageUpload
+            images={images}
+            onChange={setImages}
+            disabled={submitting}
+          />
           <Button
             type="submit"
             disabled={submitting}

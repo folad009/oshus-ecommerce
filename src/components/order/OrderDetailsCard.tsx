@@ -1,10 +1,14 @@
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
-import { completedOrder } from "@/data/order-completed";
 import { formatNaira } from "@/lib/currency";
+import type { CompletedOrderSnapshot } from "@/lib/completed-order-storage";
 
-export function OrderDetailsCard() {
-  const { items, shipping, taxes, couponDiscount, total } = completedOrder;
+interface OrderDetailsCardProps {
+  order: CompletedOrderSnapshot;
+}
+
+export function OrderDetailsCard({ order }: OrderDetailsCardProps) {
+  const { items, shipping, taxes, couponDiscount, total } = order;
 
   return (
     <section className="max-w-7xl mx-auto px-4 pb-10">
@@ -35,11 +39,13 @@ export function OrderDetailsCard() {
                   <p className="text-sm font-semibold text-foreground truncate">
                     {item.name}
                   </p>
-                  <p className="text-xs text-muted-foreground">{item.category}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {item.category} × {item.quantity}
+                  </p>
                 </div>
               </div>
               <span className="text-sm font-semibold text-foreground shrink-0">
-                {formatNaira(item.subtotal)}
+                {formatNaira(item.price * item.quantity)}
               </span>
             </div>
           ))}
@@ -51,7 +57,7 @@ export function OrderDetailsCard() {
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Shipping</span>
             <span className="font-medium text-foreground">
-              {formatNaira(shipping)}
+              {shipping === 0 ? "Free" : formatNaira(shipping)}
             </span>
           </div>
           <div className="flex items-center justify-between text-sm">
@@ -60,12 +66,14 @@ export function OrderDetailsCard() {
               {formatNaira(taxes)}
             </span>
           </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Coupon Discount</span>
-            <span className="font-medium text-forest">
-              -{formatNaira(couponDiscount)}
-            </span>
-          </div>
+          {couponDiscount > 0 && (
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Coupon Discount</span>
+              <span className="font-medium text-forest">
+                -{formatNaira(couponDiscount)}
+              </span>
+            </div>
+          )}
           <div className="flex items-center justify-between pt-2">
             <span className="text-base font-bold text-foreground">Total</span>
             <span className="text-lg font-bold text-foreground">

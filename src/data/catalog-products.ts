@@ -10,6 +10,7 @@ export interface CatalogProduct {
   price: number;
   originalPrice: number;
   image: string;
+  images: string[];
   rating: number;
   discount: string;
   stock: number;
@@ -44,6 +45,7 @@ export function catalogToShopProduct(product: CatalogProduct): ShopProduct {
     price: product.price,
     originalPrice: product.originalPrice,
     image: product.image,
+    images: product.images,
     rating: product.rating,
     discount: product.discount,
   };

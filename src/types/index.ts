@@ -40,6 +40,7 @@ export interface ShopProduct {
   price: number;
   originalPrice: number;
   image: string;
+  images?: string[];
   rating: number;
   discount: string;
 }

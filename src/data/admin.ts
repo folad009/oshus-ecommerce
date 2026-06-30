@@ -122,6 +122,7 @@ export const adminOrders: AdminOrder[] = [
 export const adminNavItems = [
   { label: "Dashboard", href: "/admin", icon: "layout-dashboard" as const },
   { label: "Products", href: "/admin/products", icon: "package" as const },
+  { label: "Categories", href: "/admin/categories", icon: "tags" as const },
   { label: "Orders", href: "/admin/orders", icon: "shopping-bag" as const },
   {
     label: "Track Order",

@@ -1,16 +1,36 @@
-import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
-import { checkoutSummary, formatNaira } from "@/data/checkout";
+"use client";
 
-export function CheckoutOrderSummary() {
-  const { itemCount, subtotal, shipping, taxes, couponDiscount, total } =
-    checkoutSummary;
+import { Separator } from "@/components/ui/separator";
+import { formatNaira } from "@/lib/currency";
+import { useCart } from "@/store/cart-provider";
+
+interface CheckoutOrderSummaryProps {
+  shippingFee: number;
+}
+
+export function CheckoutOrderSummary({ shippingFee }: CheckoutOrderSummaryProps) {
+  const { items, itemCount, subtotal, taxes, couponDiscount } = useCart();
+  const total = subtotal + shippingFee + taxes - couponDiscount;
 
   return (
     <div className="bg-white rounded-xl border border-border shadow-sm p-6 sticky top-24">
       <h2 className="text-base font-bold text-foreground mb-5">Order Summary</h2>
+
+      {items.length > 0 && (
+        <ul className="flex flex-col gap-3 mb-5 text-sm">
+          {items.map((item) => (
+            <li key={item.id} className="flex items-start justify-between gap-3">
+              <span className="text-foreground">
+                {item.name}{" "}
+                <span className="text-muted-foreground">× {item.quantity}</span>
+              </span>
+              <span className="font-medium shrink-0">
+                {formatNaira(item.price * item.quantity)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
 
       <div className="flex flex-col gap-3 text-sm">
         <div className="flex items-center justify-between">
@@ -24,9 +44,9 @@ export function CheckoutOrderSummary() {
           </span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-muted-foreground">Shipping</span>
+          <span className="text-muted-foreground">Kwik Delivery</span>
           <span className="font-medium text-foreground">
-            {formatNaira(shipping)}
+            {shippingFee > 0 ? formatNaira(shippingFee) : "Get quote"}
           </span>
         </div>
         <div className="flex items-center justify-between">
@@ -35,32 +55,24 @@ export function CheckoutOrderSummary() {
             {formatNaira(taxes)}
           </span>
         </div>
-        <div className="flex items-center justify-between">
-          <span className="text-muted-foreground">Coupon Discount</span>
-          <span className="font-medium text-checkout-green">
-            -{formatNaira(couponDiscount)}
-          </span>
-        </div>
+        {couponDiscount > 0 && (
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Coupon Discount</span>
+            <span className="font-medium text-checkout-green">
+              -{formatNaira(couponDiscount)}
+            </span>
+          </div>
+        )}
       </div>
 
       <Separator className="my-4" />
 
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between">
         <span className="text-base font-bold text-foreground">Total:</span>
         <span className="text-base font-bold text-foreground">
           {formatNaira(total)}
         </span>
       </div>
-
-      <Link
-        href="/order-completed"
-        className={cn(
-          buttonVariants(),
-          "w-full bg-checkout-green hover:bg-checkout-green-dark text-white rounded-lg h-12 text-sm font-semibold"
-        )}
-      >
-        Pay with Paystack
-      </Link>
     </div>
   );
 }

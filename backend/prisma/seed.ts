@@ -203,6 +203,15 @@ async function main() {
     },
   ] as const;
 
+  const categoryNames = [
+    "Skin Care",
+    "Makeup",
+    "Hair Care",
+    "Fragrances",
+    "Nail Care",
+    "Body Care",
+  ] as const;
+
   for (const user of users) {
     await prisma.user.upsert({
       where: { email: user.email },
@@ -221,6 +230,14 @@ async function main() {
         password,
         status: UserStatus.ACTIVE,
       },
+    });
+  }
+
+  for (const name of categoryNames) {
+    await prisma.category.upsert({
+      where: { name },
+      update: {},
+      create: { name },
     });
   }
 

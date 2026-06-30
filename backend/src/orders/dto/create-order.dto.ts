@@ -2,7 +2,9 @@ import { Type } from "class-transformer";
 import {
   IsArray,
   IsEmail,
+  IsIn,
   IsInt,
+  IsNumber,
   IsOptional,
   IsString,
   Min,
@@ -44,6 +46,29 @@ export class CreateOrderDto {
   @IsOptional()
   @IsString()
   shippingAddress?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(["paystack", "opay"])
+  paymentMethod?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  shippingFee?: number;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(["Lagos", "Abuja", "Ibadan"])
+  deliveryCity?: string;
+
+  @IsOptional()
+  @IsNumber()
+  deliveryLatitude?: number;
+
+  @IsOptional()
+  @IsNumber()
+  deliveryLongitude?: number;
 
   @IsArray()
   @ValidateNested({ each: true })

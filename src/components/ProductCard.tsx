@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, ShoppingCart, Star } from "lucide-react";
@@ -5,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Product } from "@/types";
 import { formatNaira } from "@/lib/currency";
+import { useCart } from "@/store/cart-provider";
 
 interface ProductCardProps {
   product: Product;
@@ -12,7 +15,18 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, variant = "default" }: ProductCardProps) {
+  const { addItem } = useCart();
   const detailHref = `/shop/${product.id}`;
+
+  function handleAddToCart() {
+    addItem({
+      id: product.id,
+      name: product.name,
+      category: product.category,
+      price: product.price,
+      image: product.image,
+    });
+  }
 
   if (variant === "compact") {
     return (
@@ -97,6 +111,7 @@ export function ProductCard({ product, variant = "default" }: ProductCardProps) 
         </button>
         <button
           type="button"
+          onClick={handleAddToCart}
           className="size-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-coral hover:text-white transition-colors pointer-events-auto"
           aria-label="Add to cart"
         >
@@ -129,7 +144,9 @@ export function ProductCard({ product, variant = "default" }: ProductCardProps) 
             )}
           </div>
           <Button
+            type="button"
             size="icon"
+            onClick={handleAddToCart}
             className="size-8 rounded-full bg-navy hover:bg-coral text-white"
             aria-label="Add to cart"
           >

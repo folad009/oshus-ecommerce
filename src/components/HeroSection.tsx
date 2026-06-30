@@ -1,12 +1,25 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Truck, Clock, ShieldCheck, ArrowRight } from "lucide-react";
 
-export function HeroSection() {
+interface HeroSectionProps {
+  productImages?: string[];
+}
+
+export function HeroSection({ productImages = [] }: HeroSectionProps) {
+  const images =
+    productImages.length >= 3
+      ? productImages.slice(0, 3)
+      : [
+          "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&h=400&fit=crop",
+          "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=300&h=200&fit=crop",
+          "https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=300&h=200&fit=crop",
+        ];
+
   return (
     <section className="bg-navy relative overflow-hidden">
-      {/* Decorative elements */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute top-10 left-10 w-64 h-64 border border-white/20 rounded-full" />
         <div className="absolute bottom-10 right-20 w-48 h-48 border border-white/20 rounded-full" />
@@ -15,7 +28,6 @@ export function HeroSection() {
 
       <div className="max-w-7xl mx-auto px-4 py-12 lg:py-20">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          {/* Left Content */}
           <div className="text-white">
             <span className="inline-block bg-brand/20 text-brand text-xs font-semibold px-3 py-1 rounded-full mb-4">
               ✦ Trending
@@ -26,47 +38,52 @@ export function HeroSection() {
               <span className="text-brand">OshusStore</span>
             </h1>
             <p className="text-white/70 text-base md:text-lg mb-8 max-w-md">
-              Discover premium products at unbeatable prices. Fresh groceries,
-              wellness essentials, and everyday needs delivered to your door.
+              Discover premium beauty and wellness products at unbeatable
+              prices, delivered to your door.
             </p>
-            <Button className="bg-brand hover:bg-brand-dark text-white rounded-full px-8 h-12 text-base font-semibold gap-2">
-              Start Shopping
-              <ArrowRight className="size-4" />
+            <Button
+              className="bg-brand hover:bg-brand-dark text-white rounded-full px-8 h-12 text-base font-semibold gap-2"
+              asChild
+            >
+              <Link href="/shop">
+                Start Shopping
+                <ArrowRight className="size-4" />
+              </Link>
             </Button>
           </div>
 
-          {/* Right Content - Product Collage + Delivery Form */}
           <div className="relative">
-            {/* Product Images Grid */}
             <div className="grid grid-cols-3 gap-3 mb-4">
               <div className="col-span-2 row-span-2 relative rounded-lg overflow-hidden h-64">
                 <Image
-                  src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&h=400&fit=crop"
-                  alt="Fresh groceries from oshus store"
+                  src={images[0]}
+                  alt="Featured product"
                   fill
                   className="object-cover"
                   priority
+                  sizes="(max-width: 1024px) 66vw, 400px"
                 />
               </div>
               <div className="relative rounded-lg overflow-hidden h-30.5">
                 <Image
-                  src="https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=300&h=200&fit=crop"
-                  alt="Wellness products"
+                  src={images[1]}
+                  alt="Featured product"
                   fill
                   className="object-cover"
+                  sizes="150px"
                 />
               </div>
               <div className="relative rounded-lg overflow-hidden h-30.5">
                 <Image
-                  src="https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=300&h=200&fit=crop"
-                  alt="Premium snacks"
+                  src={images[2]}
+                  alt="Featured product"
                   fill
                   className="object-cover"
+                  sizes="150px"
                 />
               </div>
             </div>
 
-            {/* Delivery Form Card */}
             <div className="bg-white rounded-lg p-5 shadow-xl">
               <h3 className="text-navy font-bold text-base mb-3">
                 Fast Delivery
@@ -105,7 +122,6 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* Trust badges */}
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex flex-wrap items-center justify-center gap-8 text-white/60 text-xs">

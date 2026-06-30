@@ -13,6 +13,7 @@ import {
   LogOut,
   Menu,
   X,
+  Tags,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { adminNavItems } from "@/data/admin";
@@ -26,6 +27,7 @@ const iconMap = {
   "user-cog": UserCog,
   truck: Truck,
   settings: Settings,
+  tags: Tags,
 } as const;
 
 interface AdminSidebarProps {

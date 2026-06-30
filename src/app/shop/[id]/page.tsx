@@ -4,7 +4,7 @@ import { ProductDetailContent } from "@/components/product/ProductDetailContent"
 import { ShopFeaturesBar } from "@/components/shop/ShopFeaturesBar";
 import { Footer } from "@/components/Footer";
 import { getProductDetail } from "@/data/product-detail";
-import { shopProducts } from "@/data/shop";
+import { getApprovedShopProducts } from "@/lib/shop-catalog";
 
 interface ProductPageProps {
   params: Promise<{ id: string }>;
@@ -12,8 +12,9 @@ interface ProductPageProps {
 
 export const dynamicParams = true;
 
-export function generateStaticParams() {
-  return shopProducts.map((product) => ({ id: product.id }));
+export async function generateStaticParams() {
+  const products = await getApprovedShopProducts();
+  return products.map((product) => ({ id: product.id }));
 }
 
 export async function generateMetadata({

@@ -11,6 +11,7 @@ interface OrderSummaryProps {
   taxes: number;
   couponDiscount: number;
   total: number;
+  checkoutDisabled?: boolean;
 }
 
 export function OrderSummary({
@@ -20,6 +21,7 @@ export function OrderSummary({
   taxes,
   couponDiscount,
   total,
+  checkoutDisabled = false,
 }: OrderSummaryProps) {
   return (
     <div className="bg-white rounded-2xl border border-border shadow-sm p-6 sticky top-24">
@@ -38,8 +40,8 @@ export function OrderSummary({
         </div>
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground">Shipping</span>
-          <span className="font-medium text-foreground">
-            {formatNaira(shipping)}
+          <span className="font-medium text-muted-foreground text-right">
+            Calculated at checkout
           </span>
         </div>
         <div className="flex items-center justify-between">
@@ -65,15 +67,26 @@ export function OrderSummary({
         </span>
       </div>
 
-      <Link
-        href="/checkout"
-        className={cn(
-          buttonVariants(),
-          "w-full bg-forest hover:bg-forest-dark text-white rounded-xl h-12 text-sm font-semibold"
-        )}
-      >
-        Proceed to Checkout
-      </Link>
+      {checkoutDisabled ? (
+        <span
+          className={cn(
+            buttonVariants(),
+            "w-full bg-muted text-muted-foreground rounded-xl h-12 text-sm font-semibold pointer-events-none"
+          )}
+        >
+          Proceed to Checkout
+        </span>
+      ) : (
+        <Link
+          href="/checkout"
+          className={cn(
+            buttonVariants(),
+            "w-full bg-forest hover:bg-forest-dark text-white rounded-xl h-12 text-sm font-semibold"
+          )}
+        >
+          Proceed to Checkout
+        </Link>
+      )}
     </div>
   );
 }

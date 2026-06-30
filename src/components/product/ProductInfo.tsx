@@ -1,20 +1,52 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Heart, Star, Globe, MessageCircle, Send } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ProductDetail } from "@/types";
 import { formatNaira } from "@/lib/currency";
+import { useCart } from "@/store/cart-provider";
 
 interface ProductInfoProps {
   product: ProductDetail;
 }
 
 export function ProductInfo({ product }: ProductInfoProps) {
+  const router = useRouter();
+  const { addItem } = useCart();
   const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
-  const [quantity, setQuantity] = useState(4);
+  const [quantity, setQuantity] = useState(1);
+  const [feedback, setFeedback] = useState("");
+
+  function handleAddToCart() {
+    addItem(
+      {
+        id: product.id,
+        name: product.name,
+        category: product.category,
+        price: product.price,
+        image: product.image,
+      },
+      quantity
+    );
+    setFeedback("Added to cart.");
+  }
+
+  function handleBuyNow() {
+    addItem(
+      {
+        id: product.id,
+        name: product.name,
+        category: product.category,
+        price: product.price,
+        image: product.image,
+      },
+      quantity
+    );
+    router.push("/checkout");
+  }
 
   return (
     <div>
@@ -83,6 +115,12 @@ export function ProductInfo({ product }: ProductInfoProps) {
         </div>
       </div>
 
+      {feedback && (
+        <p className="text-sm text-forest mb-4" role="status">
+          {feedback}
+        </p>
+      )}
+
       <div className="flex flex-wrap items-center gap-3 mb-8">
         <div className="flex items-center border border-border rounded-lg overflow-hidden">
           <button
@@ -104,25 +142,27 @@ export function ProductInfo({ product }: ProductInfoProps) {
           </button>
         </div>
 
-        <Link
-          href="/cart"
+        <button
+          type="button"
+          onClick={handleAddToCart}
           className={cn(
             buttonVariants(),
             "bg-forest hover:bg-forest-dark text-white rounded-lg h-11 px-6 text-sm font-semibold"
           )}
         >
           Add To Cart
-        </Link>
+        </button>
 
-        <Link
-          href="/checkout"
+        <button
+          type="button"
+          onClick={handleBuyNow}
           className={cn(
             buttonVariants(),
             "bg-gold hover:bg-gold/90 text-white rounded-lg h-11 px-6 text-sm font-semibold"
           )}
         >
           Buy Now
-        </Link>
+        </button>
 
         <button
           type="button"

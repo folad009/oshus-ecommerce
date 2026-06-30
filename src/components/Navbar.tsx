@@ -9,10 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import { navLinks } from "@/data/navigation";
+import { useCart } from "@/store/cart-provider";
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+  const { itemCount, hydrated } = useCart();
 
   return (
     <nav className="bg-white border-b border-border sticky top-0 z-50">
@@ -69,9 +71,11 @@ export function Navbar() {
               )}
             >
               <ShoppingCart />
-              <span className="absolute -top-0.5 -right-0.5 bg-brand text-white text-[10px] font-bold rounded-full size-4 flex items-center justify-center">
-                3
-              </span>
+              {hydrated && itemCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-brand text-white text-[10px] font-bold rounded-full min-w-4 h-4 px-1 flex items-center justify-center">
+                  {itemCount > 99 ? "99+" : itemCount}
+                </span>
+              )}
             </Link>
             <Link
               href="/account"

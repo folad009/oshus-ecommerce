@@ -3,7 +3,7 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from "@nestjs/common";
-import { OrderStatus, Role } from "@prisma/client";
+import { OrderStatus, PaymentStatus, Role } from "@prisma/client";
 import {
   formatDateTime,
   formatOrderDate,
@@ -110,7 +110,7 @@ function buildActivityLog(
     {
       id: "2",
       time,
-      actor: "Paystack",
+      actor: "Payment Gateway",
       action: "Payment confirmed",
     },
   ];
@@ -337,12 +337,16 @@ export class OrdersService {
       throw new UnprocessableEntityException("Order must include items.");
     }
 
-    const total = dto.items.reduce(
+    const itemsSubtotal = dto.items.reduce(
       (sum, item) => sum + item.unitPrice * item.quantity,
       0
     );
+    const shippingFee = Math.max(0, Math.round(dto.shippingFee ?? 0));
+    const total = itemsSubtotal + shippingFee;
     const itemCount = dto.items.reduce((sum, item) => sum + item.quantity, 0);
     const orderNumber = `SDGT${Date.now().toString(36).toUpperCase().slice(-6)}`;
+    const paymentMethod =
+      dto.paymentMethod?.toLowerCase() === "opay" ? "OPay" : "Paystack";
 
     const productIds = dto.items
       .map((i) => i.productId)
@@ -368,10 +372,16 @@ export class OrdersService {
         customerEmail: dto.customerEmail.trim().toLowerCase(),
         customerPhone: dto.customerPhone?.trim() ?? "",
         shippingAddress: dto.shippingAddress?.trim() ?? "",
+        shippingFee,
+        deliveryCity: dto.deliveryCity?.trim() ?? "",
+        deliveryLatitude: dto.deliveryLatitude ?? null,
+        deliveryLongitude: dto.deliveryLongitude ?? null,
+        paymentMethod,
+        carrier: "Kwik",
         total,
         itemCount,
         estimatedDelivery: new Date(
-          Date.now() + 4 * 24 * 60 * 60 * 1000
+          Date.now() + 2 * 24 * 60 * 60 * 1000
         )
           .toLocaleDateString("en-GB", {
             day: "numeric",
@@ -398,7 +408,96 @@ export class OrdersService {
     return {
       order: this.formatListOrder(order),
       orderNumber: formatOrderNumber(order.orderNumber),
+      paymentMethod: order.paymentMethod,
+      total: order.total,
+      shippingFee: order.shippingFee,
     };
+  }
+
+  async findOrderEntityByNumber(orderNumber: string) {
+    const normalized = parseOrderNumber(orderNumber);
+    const order = await this.prisma.order.findUnique({
+      where: { orderNumber: normalized },
+      include: { items: true },
+    });
+
+    if (!order) {
+      throw new NotFoundException("Order not found.");
+    }
+
+    return order;
+  }
+
+  async findOrderByPaymentReference(reference: string) {
+    return this.prisma.order.findUnique({
+      where: { paymentReference: reference },
+      include: { items: true },
+    });
+  }
+
+  async attachPaymentReference(
+    orderId: string,
+    data: { paymentReference: string; paymentMethod: string }
+  ) {
+    return this.prisma.order.update({
+      where: { id: orderId },
+      data: {
+        paymentReference: data.paymentReference,
+        paymentMethod: data.paymentMethod,
+      },
+      include: { items: true },
+    });
+  }
+
+  async markOrderPaid(orderId: string) {
+    return this.prisma.order.update({
+      where: { id: orderId },
+      data: {
+        paymentStatus: PaymentStatus.PAID,
+        paidAt: new Date(),
+        status: OrderStatus.PROCESSING,
+      },
+      include: { items: true },
+    });
+  }
+
+  async markPaymentFailed(orderId: string) {
+    return this.prisma.order.update({
+      where: { id: orderId },
+      data: {
+        paymentStatus: PaymentStatus.FAILED,
+      },
+      include: { items: true },
+    });
+  }
+
+  async attachDeliveryDetails(
+    orderId: string,
+    data: {
+      trackingNumber: string;
+      kwikTrackingUrl: string;
+      estimatedDelivery: string;
+      status: OrderStatus;
+    }
+  ) {
+    return this.prisma.order.update({
+      where: { id: orderId },
+      data: {
+        trackingNumber: data.trackingNumber,
+        kwikTrackingUrl: data.kwikTrackingUrl,
+        estimatedDelivery: data.estimatedDelivery,
+        status: data.status,
+      },
+      include: { items: true },
+    });
+  }
+
+  async updateOrderStatusInternal(orderId: string, status: OrderStatus) {
+    return this.prisma.order.update({
+      where: { id: orderId },
+      data: { status },
+      include: { items: true },
+    });
   }
 
   async listSupportOrderLookups() {
