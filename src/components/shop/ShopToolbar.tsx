@@ -2,7 +2,7 @@
 
 import { X } from "lucide-react";
 import { shopSortOptions } from "@/data/shop";
-import { formatNaira } from "@/lib/currency";
+import { useCurrency } from "@/store/currency-provider";
 
 interface ActiveFilter {
   id: string;
@@ -22,6 +22,8 @@ export function ShopToolbar({
   onRemoveFilter,
   onClearAll,
 }: ShopToolbarProps) {
+  const { formatFromNgn } = useCurrency();
+
   return (
     <div className="flex flex-col gap-4 mb-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -46,7 +48,7 @@ export function ShopToolbar({
 
       <div className="flex flex-wrap items-center gap-2">
         <span className="inline-flex items-center gap-1.5 bg-forest text-white text-xs font-medium px-3 py-1.5 rounded-full">
-          Price : {formatNaira(priceRange[0])} - {formatNaira(priceRange[1])}
+          Price : {formatFromNgn(priceRange[0])} - {formatFromNgn(priceRange[1])}
           <button
             type="button"
             onClick={() => onRemoveFilter("price")}

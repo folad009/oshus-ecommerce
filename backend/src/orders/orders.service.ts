@@ -3,7 +3,13 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { OrderStatus, PaymentStatus, Role } from "@prisma/client";
+import {
+  convertNgnToZar,
+  getNgnToZarRate,
+  normalizeStoreCurrency,
+} from "../common/currency";
 import {
   formatDateTime,
   formatOrderDate,
@@ -162,7 +168,10 @@ function buildActivityLog(
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly config: ConfigService
+  ) {}
 
   private formatListOrder(order: {
     orderNumber: string;
@@ -337,11 +346,30 @@ export class OrdersService {
       throw new UnprocessableEntityException("Order must include items.");
     }
 
-    const itemsSubtotal = dto.items.reduce(
+    const currency = normalizeStoreCurrency(dto.currency);
+    const ngnToZarRate = getNgnToZarRate(this.config);
+
+    const itemsSubtotalNgn = dto.items.reduce(
       (sum, item) => sum + item.unitPrice * item.quantity,
       0
     );
-    const shippingFee = Math.max(0, Math.round(dto.shippingFee ?? 0));
+    const shippingFeeNgn = Math.max(0, Math.round(dto.shippingFee ?? 0));
+
+    const convertAmount = (amountNgn: number) =>
+      currency === "ZAR"
+        ? convertNgnToZar(amountNgn, ngnToZarRate)
+        : amountNgn;
+
+    const shippingFee = convertAmount(shippingFeeNgn);
+    const orderItems = dto.items.map((item) => ({
+      ...item,
+      unitPrice: convertAmount(item.unitPrice),
+    }));
+
+    const itemsSubtotal = orderItems.reduce(
+      (sum, item) => sum + item.unitPrice * item.quantity,
+      0
+    );
     const total = itemsSubtotal + shippingFee;
     const itemCount = dto.items.reduce((sum, item) => sum + item.quantity, 0);
     const orderNumber = `SDGT${Date.now().toString(36).toUpperCase().slice(-6)}`;
@@ -377,6 +405,7 @@ export class OrdersService {
         deliveryLatitude: dto.deliveryLatitude ?? null,
         deliveryLongitude: dto.deliveryLongitude ?? null,
         paymentMethod,
+        currency,
         carrier: "Kwik",
         total,
         itemCount,
@@ -389,7 +418,7 @@ export class OrdersService {
             year: "numeric",
           }),
         items: {
-          create: dto.items.map((item) => ({
+          create: orderItems.map((item) => ({
             name: item.name,
             quantity: item.quantity,
             unitPrice: item.unitPrice,
@@ -409,6 +438,7 @@ export class OrdersService {
       order: this.formatListOrder(order),
       orderNumber: formatOrderNumber(order.orderNumber),
       paymentMethod: order.paymentMethod,
+      currency: order.currency,
       total: order.total,
       shippingFee: order.shippingFee,
     };

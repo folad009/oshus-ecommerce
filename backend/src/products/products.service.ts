@@ -11,6 +11,61 @@ import { AdminCreateProductDto } from "./dto/admin-create-product.dto";
 import { CreateProductDto } from "./dto/create-product.dto";
 import { UpdateProductDto } from "./dto/update-product.dto";
 import { resolveProductImages } from "./product-images.util";
+import {
+  formatProductDetails,
+  normalizeProductDetails,
+  toAdditionalInfoJson,
+} from "./product-details.util";
+import type { ProductDetailsFieldsDto } from "./dto/product-details.dto";
+import type { Prisma } from "@prisma/client";
+
+function buildDetailsData(dto: ProductDetailsFieldsDto): {
+  sku: string;
+  shortDescription: string;
+  description: string[];
+  descriptionBullets: string[];
+  tags: string[];
+  sizes: string[];
+  additionalInfo: Prisma.InputJsonValue;
+} {
+  const details = normalizeProductDetails(dto);
+  return {
+    ...details,
+    additionalInfo: toAdditionalInfoJson(details.additionalInfo),
+  };
+}
+
+function buildDetailsPatch(dto: ProductDetailsFieldsDto) {
+  const patch: Prisma.ProductUpdateInput = {};
+
+  if (dto.sku !== undefined) {
+    patch.sku = dto.sku.trim();
+  }
+  if (dto.shortDescription !== undefined) {
+    patch.shortDescription = dto.shortDescription.trim();
+  }
+  if (dto.description !== undefined) {
+    patch.description = dto.description.map((p) => p.trim()).filter(Boolean);
+  }
+  if (dto.descriptionBullets !== undefined) {
+    patch.descriptionBullets = dto.descriptionBullets
+      .map((b) => b.trim())
+      .filter(Boolean);
+  }
+  if (dto.tags !== undefined) {
+    patch.tags = dto.tags.map((t) => t.trim()).filter(Boolean);
+  }
+  if (dto.sizes !== undefined) {
+    patch.sizes = dto.sizes.map((s) => s.trim()).filter(Boolean);
+  }
+  if (dto.additionalInfo !== undefined) {
+    patch.additionalInfo = toAdditionalInfoJson(
+      dto.additionalInfo.filter((row) => row.label.trim().length > 0)
+    );
+  }
+
+  return patch;
+}
 
 function formatProduct(product: {
   id: string;
@@ -21,6 +76,13 @@ function formatProduct(product: {
   originalPrice: number;
   image: string;
   images: string[];
+  sku: string;
+  shortDescription: string;
+  description: string[];
+  descriptionBullets: string[];
+  tags: string[];
+  sizes: string[];
+  additionalInfo: Prisma.JsonValue;
   rating: number;
   discount: string;
   stock: number;
@@ -44,6 +106,7 @@ function formatProduct(product: {
     originalPrice: product.originalPrice,
     image: product.image,
     images: product.images.length > 0 ? product.images : [product.image],
+    ...formatProductDetails(product),
     rating: product.rating,
     discount: product.discount,
     stock: product.stock,
@@ -104,6 +167,7 @@ export class ProductsService {
     const price = Math.round(dto.price);
     const originalPrice = Math.round(dto.originalPrice);
     const { image, images } = resolveProductImages(dto);
+    const details = buildDetailsData(dto);
 
     const product = await this.prisma.product.create({
       data: {
@@ -114,6 +178,7 @@ export class ProductsService {
         originalPrice,
         image,
         images,
+        ...details,
         stock: Math.max(0, Math.round(dto.stock)),
         discount: computeDiscount(price, originalPrice),
         status: ProductStatus.PENDING,
@@ -205,6 +270,7 @@ export class ProductsService {
     const price = Math.round(dto.price);
     const originalPrice = Math.round(dto.originalPrice);
     const { image, images } = resolveProductImages(dto);
+    const details = buildDetailsData(dto);
 
     const product = await this.prisma.product.create({
       data: {
@@ -215,6 +281,7 @@ export class ProductsService {
         originalPrice,
         image,
         images,
+        ...details,
         stock: Math.max(0, Math.round(dto.stock)),
         discount: computeDiscount(price, originalPrice),
         status: ProductStatus.APPROVED,
@@ -272,6 +339,7 @@ export class ProductsService {
         ...(dto.stock !== undefined
           ? { stock: Math.max(0, Math.round(dto.stock)) }
           : {}),
+        ...buildDetailsPatch(dto),
         ...(dto.price !== undefined || dto.originalPrice !== undefined
           ? { discount: computeDiscount(price, originalPrice) }
           : {}),
@@ -303,16 +371,29 @@ export class ProductsService {
       orderBy: { submittedAt: "desc" },
     });
 
-    return products.map((product) => ({
-      id: product.id,
-      name: product.name,
-      category: product.category,
-      price: product.price,
-      originalPrice: product.originalPrice,
-      image: product.image,
-      images: product.images.length > 0 ? product.images : [product.image],
-      rating: product.rating,
-      discount: product.discount,
-    }));
+    return products.map((product) => {
+      const details = formatProductDetails(product);
+
+      return {
+        id: product.id,
+        name: product.name,
+        category: product.category,
+        price: product.price,
+        originalPrice: product.originalPrice,
+        image: product.image,
+        images: product.images.length > 0 ? product.images : [product.image],
+        rating: product.rating,
+        discount: product.discount,
+        stock: product.stock,
+        sku: details.sku,
+        shortDescription: details.shortDescription,
+        description: details.description,
+        descriptionBullets: details.descriptionBullets,
+        tags: details.tags,
+        sizes: details.sizes,
+        additionalInfo: details.additionalInfo,
+        inStock: details.inStock,
+      };
+    });
   }
 }

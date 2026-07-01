@@ -1,6 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
-import { formatNaira } from "@/lib/currency";
+import { formatCurrency } from "@/lib/currency";
 import type { CompletedOrderSnapshot } from "@/lib/completed-order-storage";
 
 interface OrderDetailsCardProps {
@@ -8,7 +10,9 @@ interface OrderDetailsCardProps {
 }
 
 export function OrderDetailsCard({ order }: OrderDetailsCardProps) {
-  const { items, shipping, taxes, couponDiscount, total } = order;
+  const { items, shipping, taxes, couponDiscount, total, currency = "NGN" } =
+    order;
+  const format = (amount: number) => formatCurrency(amount, currency);
 
   return (
     <section className="max-w-7xl mx-auto px-4 pb-10">
@@ -45,7 +49,7 @@ export function OrderDetailsCard({ order }: OrderDetailsCardProps) {
                 </div>
               </div>
               <span className="text-sm font-semibold text-foreground shrink-0">
-                {formatNaira(item.price * item.quantity)}
+                {format(item.price * item.quantity)}
               </span>
             </div>
           ))}
@@ -57,27 +61,25 @@ export function OrderDetailsCard({ order }: OrderDetailsCardProps) {
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Shipping</span>
             <span className="font-medium text-foreground">
-              {shipping === 0 ? "Free" : formatNaira(shipping)}
+              {shipping === 0 ? "Free" : format(shipping)}
             </span>
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Taxes</span>
-            <span className="font-medium text-foreground">
-              {formatNaira(taxes)}
-            </span>
+            <span className="font-medium text-foreground">{format(taxes)}</span>
           </div>
           {couponDiscount > 0 && (
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Coupon Discount</span>
               <span className="font-medium text-forest">
-                -{formatNaira(couponDiscount)}
+                -{format(couponDiscount)}
               </span>
             </div>
           )}
           <div className="flex items-center justify-between pt-2">
             <span className="text-base font-bold text-foreground">Total</span>
             <span className="text-lg font-bold text-foreground">
-              {formatNaira(total)}
+              {format(total)}
             </span>
           </div>
         </div>

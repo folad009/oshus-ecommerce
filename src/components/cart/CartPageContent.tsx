@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { OrderSummary } from "@/components/cart/OrderSummary";
-import { formatNaira } from "@/lib/currency";
+import { useCurrency } from "@/store/currency-provider";
 import { useCart } from "@/store/cart-provider";
 
 export function CartPageContent() {
@@ -23,6 +23,7 @@ export function CartPageContent() {
     removeItem,
     clearCart,
   } = useCart();
+  const { formatFromNgn } = useCurrency();
 
   const lineSubtotal = (price: number, quantity: number) => price * quantity;
 
@@ -113,7 +114,7 @@ export function CartPageContent() {
                           </div>
                         </td>
                         <td className="py-4 px-4 text-sm text-foreground align-middle">
-                          {formatNaira(item.price)}
+                          {formatFromNgn(item.price)}
                         </td>
                         <td className="py-4 px-4 align-middle">
                           <div className="flex items-center justify-center gap-2">
@@ -143,7 +144,7 @@ export function CartPageContent() {
                           </div>
                         </td>
                         <td className="py-4 px-4 text-sm font-semibold text-foreground text-right align-middle">
-                          {formatNaira(lineSubtotal(item.price, item.quantity))}
+                          {formatFromNgn(lineSubtotal(item.price, item.quantity))}
                         </td>
                       </tr>
                     ))

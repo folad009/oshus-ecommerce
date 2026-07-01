@@ -6,7 +6,7 @@ import { Heart, Star, Globe, MessageCircle, Send } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ProductDetail } from "@/types";
-import { formatNaira } from "@/lib/currency";
+import { useCurrency } from "@/store/currency-provider";
 import { useCart } from "@/store/cart-provider";
 
 interface ProductInfoProps {
@@ -16,6 +16,7 @@ interface ProductInfoProps {
 export function ProductInfo({ product }: ProductInfoProps) {
   const router = useRouter();
   const { addItem } = useCart();
+  const { formatFromNgn } = useCurrency();
   const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
   const [quantity, setQuantity] = useState(1);
   const [feedback, setFeedback] = useState("");
@@ -83,10 +84,10 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
       <div className="flex items-center gap-3 mb-4">
         <span className="text-2xl font-bold text-gold">
-          {formatNaira(product.price)}
+          {formatFromNgn(product.price)}
         </span>
         <span className="text-lg text-muted-foreground line-through">
-          {formatNaira(product.originalPrice)}
+          {formatFromNgn(product.originalPrice)}
         </span>
       </div>
 

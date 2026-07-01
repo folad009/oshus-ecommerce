@@ -9,8 +9,9 @@ import {
   Min,
   ValidateIf,
 } from "class-validator";
+import { ProductDetailsFieldsDto } from "./product-details.dto";
 
-export class CreateProductDto {
+export class CreateProductDto extends ProductDetailsFieldsDto {
   @IsString()
   name!: string;
 

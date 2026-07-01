@@ -8,8 +8,9 @@ import {
   IsUrl,
   Min,
 } from "class-validator";
+import { ProductDetailsFieldsDto } from "./product-details.dto";
 
-export class UpdateProductDto {
+export class UpdateProductDto extends ProductDetailsFieldsDto {
   @IsOptional()
   @IsString()
   name?: string;

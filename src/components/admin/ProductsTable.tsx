@@ -4,158 +4,19 @@ import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { formatNaira } from "@/lib/currency";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useShopCategories } from "@/hooks/useShopCategories";
-import type { ShopCategory } from "@/data/shop-categories";
 import {
   productApprovalStatusStyles,
   type CatalogProduct,
 } from "@/data/catalog-products";
-import { ProductImageUpload } from "@/components/products/ProductImageUpload";
-
-type ProductFormData = {
-  name: string;
-  category: string;
-  price: string;
-  originalPrice: string;
-  images: string[];
-  stock: string;
-  vendorEmail: string;
-};
-
-const emptyForm: ProductFormData = {
-  name: "",
-  category: "",
-  price: "",
-  originalPrice: "",
-  images: [],
-  stock: "10",
-  vendorEmail: "",
-};
-
-function productToForm(product: CatalogProduct): ProductFormData {
-  return {
-    name: product.name,
-    category: product.category,
-    price: String(product.price),
-    originalPrice: String(product.originalPrice),
-    images:
-      product.images.length > 0 ? product.images : product.image ? [product.image] : [],
-    stock: String(product.stock),
-    vendorEmail: product.vendorEmail,
-  };
-}
-
-function ProductFormFields({
-  form,
-  onChange,
-  onImagesChange,
-  showVendorEmail,
-  categories,
-  disabled,
-}: {
-  form: ProductFormData;
-  onChange: (field: keyof ProductFormData, value: string) => void;
-  onImagesChange: (images: string[]) => void;
-  showVendorEmail?: boolean;
-  categories: ShopCategory[];
-  disabled?: boolean;
-}) {
-  return (
-    <>
-      <div className="md:col-span-2">
-        <label className="text-sm font-medium text-foreground mb-1.5 block">
-          Product name <span className="text-coral">*</span>
-        </label>
-        <Input
-          value={form.name}
-          onChange={(e) => onChange("name", e.target.value)}
-          required
-          placeholder="HydraGlow Serum"
-          className="h-11 rounded-lg"
-        />
-      </div>
-      <div>
-        <label className="text-sm font-medium text-foreground mb-1.5 block">
-          Category <span className="text-coral">*</span>
-        </label>
-        <select
-          value={form.category}
-          onChange={(e) => onChange("category", e.target.value)}
-          required
-          className="flex h-11 w-full rounded-lg border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-        >
-          <option value="">Select category</option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.name}>
-              {category.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label className="text-sm font-medium text-foreground mb-1.5 block">
-          Stock <span className="text-coral">*</span>
-        </label>
-        <Input
-          type="number"
-          min={0}
-          value={form.stock}
-          onChange={(e) => onChange("stock", e.target.value)}
-          required
-          className="h-11 rounded-lg"
-        />
-      </div>
-      <div>
-        <label className="text-sm font-medium text-foreground mb-1.5 block">
-          Price (₦) <span className="text-coral">*</span>
-        </label>
-        <Input
-          type="number"
-          min={1}
-          value={form.price}
-          onChange={(e) => onChange("price", e.target.value)}
-          required
-          placeholder="35000"
-          className="h-11 rounded-lg"
-        />
-      </div>
-      <div>
-        <label className="text-sm font-medium text-foreground mb-1.5 block">
-          Original price (₦)
-        </label>
-        <Input
-          type="number"
-          min={1}
-          value={form.originalPrice}
-          onChange={(e) => onChange("originalPrice", e.target.value)}
-          placeholder="Optional for discount"
-          className="h-11 rounded-lg"
-        />
-      </div>
-      {showVendorEmail && (
-        <div className="md:col-span-2">
-          <label className="text-sm font-medium text-foreground mb-1.5 block">
-            Vendor email
-          </label>
-          <Input
-            type="email"
-            value={form.vendorEmail}
-            onChange={(e) => onChange("vendorEmail", e.target.value)}
-            placeholder="chioma@glowbeauty.ng (optional)"
-            className="h-11 rounded-lg"
-          />
-        </div>
-      )}
-      <ProductImageUpload
-        images={form.images}
-        onChange={onImagesChange}
-        disabled={disabled}
-      />
-    </>
-  );
-}
+import { ProductFormFields } from "@/components/products/ProductFormFields";
+import {
+  catalogProductToForm,
+  emptyProductForm,
+  productFormToPayload,
+  type ProductFormData,
+} from "@/lib/product-form";
 
 export function ProductsTable({
   apiBase = "/api/admin/products",
@@ -169,9 +30,9 @@ export function ProductsTable({
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
-  const [addForm, setAddForm] = useState<ProductFormData>(emptyForm);
+  const [addForm, setAddForm] = useState<ProductFormData>(emptyProductForm);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<ProductFormData>(emptyForm);
+  const [editForm, setEditForm] = useState<ProductFormData>(emptyProductForm);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const loadProducts = useCallback(async () => {
@@ -202,23 +63,7 @@ export function ProductsTable({
   }, [loadProducts]);
 
   function buildPayload(form: ProductFormData, includeVendor = false) {
-    const price = Number(form.price);
-    const originalPrice = Number(form.originalPrice || form.price);
-
-    const payload: Record<string, string | number | string[]> = {
-      name: form.name,
-      category: form.category,
-      price,
-      originalPrice,
-      images: form.images,
-      stock: Number(form.stock),
-    };
-
-    if (includeVendor && form.vendorEmail.trim()) {
-      payload.vendorEmail = form.vendorEmail.trim();
-    }
-
-    return payload;
+    return productFormToPayload(form, includeVendor);
   }
 
   async function handleAdd(e: React.FormEvent) {
@@ -246,7 +91,7 @@ export function ProductsTable({
       }
 
       setSuccess(data.message ?? "Product created.");
-      setAddForm(emptyForm);
+      setAddForm(emptyProductForm);
       setShowAddForm(false);
       await loadProducts();
     } catch {
@@ -258,14 +103,14 @@ export function ProductsTable({
 
   function startEdit(product: CatalogProduct) {
     setEditingId(product.id);
-    setEditForm(productToForm(product));
+    setEditForm(catalogProductToForm(product));
     setError("");
     setSuccess("");
   }
 
   function cancelEdit() {
     setEditingId(null);
-    setEditForm(emptyForm);
+    setEditForm(emptyProductForm);
   }
 
   async function handleEdit(e: React.FormEvent) {
@@ -297,7 +142,7 @@ export function ProductsTable({
 
       setSuccess(data.message ?? "Product updated.");
       setEditingId(null);
-      setEditForm(emptyForm);
+      setEditForm(emptyProductForm);
       await loadProducts();
     } catch {
       setError("Failed to update product.");
@@ -391,7 +236,7 @@ export function ProductsTable({
                 disabled={submitting}
                 onClick={() => {
                   setShowAddForm(false);
-                  setAddForm(emptyForm);
+                  setAddForm(emptyProductForm);
                 }}
                 className="rounded-lg h-11 text-sm"
               >

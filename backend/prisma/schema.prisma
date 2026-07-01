@@ -39,6 +39,11 @@ enum PaymentStatus {
   FAILED
 }
 
+enum StoreCurrency {
+  NGN
+  ZAR
+}
+
 enum TicketPriority {
   HIGH
   MEDIUM
@@ -86,6 +91,13 @@ model Product {
   originalPrice Int
   image         String
   images        String[]      @default([])
+  sku           String        @default("")
+  shortDescription String     @default("")
+  description   String[]      @default([])
+  descriptionBullets String[] @default([])
+  tags          String[]      @default([])
+  sizes         String[]      @default([])
+  additionalInfo Json         @default("[]")
   rating        Float         @default(0)
   discount      String        @default("")
   stock         Int
@@ -109,6 +121,7 @@ model Order {
   status            OrderStatus @default(PENDING)
   total             Int
   itemCount         Int
+  currency          StoreCurrency @default(NGN)
   paymentMethod     String        @default("Paystack")
   paymentStatus     PaymentStatus @default(PENDING)
   paymentReference  String?       @unique

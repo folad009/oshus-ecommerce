@@ -10,7 +10,7 @@ import {
   shopAvailability,
   shopReviewLevels,
 } from "@/data/shop";
-import { formatNaira } from "@/lib/currency";
+import { useCurrency } from "@/store/currency-provider";
 
 const PRICE_MAX = 100_000;
 
@@ -53,11 +53,13 @@ function PriceSlider({
   value: [number, number];
   onChange: (range: [number, number]) => void;
 }) {
+  const { formatFromNgn } = useCurrency();
+
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span>{formatNaira(value[0])}</span>
-        <span>{formatNaira(value[1])}</span>
+        <span>{formatFromNgn(value[0])}</span>
+        <span>{formatFromNgn(value[1])}</span>
       </div>
       <div className="relative h-1.5 bg-mid-gray rounded-full">
         <div
@@ -91,7 +93,7 @@ function PriceSlider({
         />
       </div>
       <p className="text-xs text-muted-foreground">
-        {formatNaira(value[0])} - {formatNaira(value[1])}
+        {formatFromNgn(value[0])} - {formatFromNgn(value[1])}
       </p>
     </div>
   );

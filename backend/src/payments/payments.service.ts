@@ -15,6 +15,8 @@ import {
   PaymentProvider,
 } from "./payment-provider.enum";
 import { PaystackService } from "./paystack.service";
+import { StoreCurrency } from "@prisma/client";
+import { toMinorUnits } from "../common/currency";
 
 @Injectable()
 export class PaymentsService {
@@ -48,8 +50,14 @@ export class PaymentsService {
       throw new UnprocessableEntityException("Order is already paid.");
     }
 
+    if (order.currency === StoreCurrency.ZAR && provider === PaymentProvider.OPAY) {
+      throw new BadRequestException(
+        "OPay only supports Nigerian Naira. Choose Paystack for ZAR payments."
+      );
+    }
+
     const reference = `${parseOrderNumber(orderNumber)}-${Date.now()}`;
-    const amountKobo = order.total;
+    const amountMinor = toMinorUnits(order.total);
     const callbackUrl = `${this.frontendUrl}/payment/callback`;
     const webhookCallback = `${this.backendUrl}/payments/webhooks/opay`;
 
@@ -61,7 +69,8 @@ export class PaymentsService {
     if (provider === PaymentProvider.PAYSTACK) {
       const result = await this.paystackService.initializePayment({
         email: order.customerEmail,
-        amountKobo,
+        amountMinor,
+        currency: order.currency,
         reference,
         callbackUrl,
         metadata: {
@@ -79,7 +88,7 @@ export class PaymentsService {
 
     const result = await this.opayService.initializePayment({
       email: order.customerEmail,
-      amountKobo,
+      amountMinor,
       reference,
       callbackUrl: webhookCallback,
       returnUrl: callbackUrl,
@@ -212,6 +221,7 @@ export class PaymentsService {
       trackingNumber: order.trackingNumber,
       kwikTrackingUrl: order.kwikTrackingUrl,
       total: order.total,
+      currency: order.currency,
       customerName: order.customerName,
       customerEmail: order.customerEmail,
     };

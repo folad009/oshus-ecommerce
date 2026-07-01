@@ -15,26 +15,36 @@ async function buildProductDetail(
   return {
     ...base,
     reviewCount: 128,
-    sku: `SKU-${id.slice(0, 8).toUpperCase()}`,
-    tags: [base.category],
-    sizes: ["Standard"],
+    sku: base.sku || `SKU-${id.slice(0, 8).toUpperCase()}`,
+    tags: base.tags && base.tags.length > 0 ? base.tags : [base.category],
+    sizes: base.sizes && base.sizes.length > 0 ? base.sizes : ["Standard"],
     images: galleryImages,
-    inStock: true,
+    inStock: base.inStock ?? (base.stock ?? 0) > 0,
     shortDescription:
+      base.shortDescription ||
       "Premium quality product crafted for everyday use with visible results.",
-    description: [
-      "This product is made with carefully selected ingredients to deliver effective results you can see and feel.",
-      "Suitable for regular use as part of your daily routine.",
-    ],
-    descriptionBullets: [
-      "High-quality ingredients",
-      "Easy to use daily",
-      "Suitable for all skin types",
-    ],
-    additionalInfo: [
-      { label: "Category", value: base.category },
-      { label: "Brand", value: "Oshus Store" },
-    ],
+    description:
+      base.description && base.description.length > 0
+        ? base.description
+        : [
+            "This product is made with carefully selected ingredients to deliver effective results you can see and feel.",
+            "Suitable for regular use as part of your daily routine.",
+          ],
+    descriptionBullets:
+      base.descriptionBullets && base.descriptionBullets.length > 0
+        ? base.descriptionBullets
+        : [
+            "High-quality ingredients",
+            "Easy to use daily",
+            "Suitable for all skin types",
+          ],
+    additionalInfo:
+      base.additionalInfo && base.additionalInfo.length > 0
+        ? base.additionalInfo
+        : [
+            { label: "Category", value: base.category },
+            { label: "Brand", value: "Oshus Store" },
+          ],
   };
 }
 

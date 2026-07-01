@@ -67,7 +67,8 @@ export class PaystackService {
 
   async initializePayment(input: {
     email: string;
-    amountKobo: number;
+    amountMinor: number;
+    currency: "NGN" | "ZAR";
     reference: string;
     callbackUrl: string;
     metadata?: Record<string, string>;
@@ -96,11 +97,11 @@ export class PaystackService {
         },
         body: JSON.stringify({
           email: input.email,
-          amount: input.amountKobo,
+          amount: input.amountMinor,
           reference: input.reference,
           callback_url: input.callbackUrl,
           metadata: input.metadata,
-          currency: "NGN",
+          currency: input.currency,
         }),
       }
     );

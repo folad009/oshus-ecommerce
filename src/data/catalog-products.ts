@@ -2,6 +2,8 @@ import type { ShopProduct } from "@/types";
 
 export type ProductApprovalStatus = "pending" | "approved" | "rejected";
 
+export type AdditionalInfoRow = { label: string; value: string };
+
 export interface CatalogProduct {
   id: string;
   vendorEmail: string;
@@ -11,6 +13,14 @@ export interface CatalogProduct {
   originalPrice: number;
   image: string;
   images: string[];
+  sku: string;
+  shortDescription: string;
+  description: string[];
+  descriptionBullets: string[];
+  tags: string[];
+  sizes: string[];
+  additionalInfo: AdditionalInfoRow[];
+  inStock: boolean;
   rating: number;
   discount: string;
   stock: number;
@@ -48,6 +58,15 @@ export function catalogToShopProduct(product: CatalogProduct): ShopProduct {
     images: product.images,
     rating: product.rating,
     discount: product.discount,
+    stock: product.stock,
+    sku: product.sku,
+    shortDescription: product.shortDescription,
+    description: product.description,
+    descriptionBullets: product.descriptionBullets,
+    tags: product.tags,
+    sizes: product.sizes,
+    additionalInfo: product.additionalInfo,
+    inStock: product.inStock,
   };
 }
 

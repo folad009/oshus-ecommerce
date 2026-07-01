@@ -1,0 +1,8 @@
+-- AlterTable
+ALTER TABLE "Product" ADD COLUMN "sku" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "Product" ADD COLUMN "shortDescription" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "Product" ADD COLUMN "description" TEXT[] DEFAULT ARRAY[]::TEXT[];
+ALTER TABLE "Product" ADD COLUMN "descriptionBullets" TEXT[] DEFAULT ARRAY[]::TEXT[];
+ALTER TABLE "Product" ADD COLUMN "tags" TEXT[] DEFAULT ARRAY[]::TEXT[];
+ALTER TABLE "Product" ADD COLUMN "sizes" TEXT[] DEFAULT ARRAY[]::TEXT[];
+ALTER TABLE "Product" ADD COLUMN "additionalInfo" JSONB NOT NULL DEFAULT '[]';

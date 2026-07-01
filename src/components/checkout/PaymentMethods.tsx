@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { formatNaira } from "@/lib/currency";
+import { useCurrency } from "@/store/currency-provider";
 import { savePendingCheckout } from "@/lib/pending-checkout-storage";
 import { useCart } from "@/store/cart-provider";
 
@@ -23,6 +23,7 @@ export function PaymentMethods({
   onShippingFeeChange,
 }: PaymentMethodsProps) {
   const { items, subtotal, taxes, couponDiscount } = useCart();
+  const { currency, convertFromNgn, formatFromNgn, formatAmount } = useCurrency();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -34,7 +35,38 @@ export function PaymentMethods({
   const [quoting, setQuoting] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    if (currency === "ZAR" && provider === "opay") {
+      setProvider("paystack");
+    }
+  }, [currency, provider]);
+
+  const displayShippingFee = convertFromNgn(shippingFee);
   const total = subtotal + shippingFee + taxes - couponDiscount;
+  const displayTotal = convertFromNgn(total);
+
+  const paymentOptions = (
+    [
+      {
+        id: "paystack" as const,
+        label: "Paystack",
+        description:
+          currency === "ZAR"
+            ? "Card and bank — pay in Rand"
+            : "Card, bank transfer, USSD",
+        badge: "PS",
+        color: "bg-checkout-green",
+      },
+      {
+        id: "opay" as const,
+        label: "OPay",
+        description: "OPay wallet, card, bank transfer (NGN only)",
+        badge: "OP",
+        color: "bg-forest",
+        hidden: currency === "ZAR",
+      },
+    ] as const
+  ).filter((option) => !("hidden" in option && option.hidden));
 
   async function fetchShippingQuote() {
     if (!name || !phone || !address || !email) {
@@ -102,6 +134,7 @@ export function PaymentMethods({
           shippingAddress: `${address}, ${city}`,
           deliveryCity: city,
           paymentMethod: provider,
+          currency,
           shippingFee,
           items: items.map((item) => ({
             name: item.name,
@@ -117,6 +150,7 @@ export function PaymentMethods({
         error?: string;
         orderNumber?: string;
         total?: number;
+        currency?: "NGN" | "ZAR";
       };
 
       if (!orderRes.ok || !orderData.orderNumber) {
@@ -128,12 +162,16 @@ export function PaymentMethods({
         orderNumber: orderData.orderNumber,
         customerName: name,
         customerEmail: email,
-        items: [...items],
-        subtotal,
-        shipping: shippingFee,
-        taxes,
-        couponDiscount,
-        total: orderData.total ?? total,
+        currency: orderData.currency ?? currency,
+        items: items.map((item) => ({
+          ...item,
+          price: convertFromNgn(item.price),
+        })),
+        subtotal: convertFromNgn(subtotal),
+        shipping: convertFromNgn(shippingFee),
+        taxes: convertFromNgn(taxes),
+        couponDiscount: convertFromNgn(couponDiscount),
+        total: orderData.total ?? displayTotal,
       });
 
       const payRes = await fetch("/api/payments/initialize", {
@@ -275,7 +313,7 @@ export function PaymentMethods({
 
           {shippingFee > 0 && (
             <p className="text-sm text-forest">
-              Kwik delivery: {formatNaira(shippingFee)}
+              Kwik delivery: {formatAmount(displayShippingFee)}
             </p>
           )}
         </div>
@@ -287,24 +325,7 @@ export function PaymentMethods({
         </h2>
 
         <div className="flex flex-col gap-3 mb-5">
-          {(
-            [
-              {
-                id: "paystack" as const,
-                label: "Paystack",
-                description: "Card, bank transfer, USSD",
-                badge: "PS",
-                color: "bg-checkout-green",
-              },
-              {
-                id: "opay" as const,
-                label: "OPay",
-                description: "OPay wallet, card, bank transfer",
-                badge: "OP",
-                color: "bg-forest",
-              },
-            ] as const
-          ).map((option) => (
+          {paymentOptions.map((option) => (
             <button
               key={option.id}
               type="button"
@@ -365,7 +386,7 @@ export function PaymentMethods({
         >
           {loading
             ? "Processing…"
-            : `Pay ${formatNaira(total)} with ${provider === "paystack" ? "Paystack" : "OPay"}`}
+            : `Pay ${formatAmount(displayTotal)} with ${provider === "paystack" ? "Paystack" : "OPay"}`}
         </Button>
       </div>
     </div>

@@ -5,14 +5,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { formatNaira } from "@/lib/currency";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useShopCategories } from "@/hooks/useShopCategories";
 import {
   productApprovalStatusStyles,
   type CatalogProduct,
 } from "@/data/catalog-products";
-import { ProductImageUpload } from "@/components/products/ProductImageUpload";
+import { ProductFormFields } from "@/components/products/ProductFormFields";
+import {
+  emptyProductForm,
+  productFormToPayload,
+  type ProductFormData,
+} from "@/lib/product-form";
 
 export function VendorProductsPanel() {
   const { categories } = useShopCategories();
@@ -21,7 +25,7 @@ export function VendorProductsPanel() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [images, setImages] = useState<string[]>([]);
+  const [form, setForm] = useState<ProductFormData>(emptyProductForm);
 
   const loadProducts = useCallback(async () => {
     setLoading(true);
@@ -50,37 +54,23 @@ export function VendorProductsPanel() {
     void loadProducts();
   }, [loadProducts]);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setSuccess("");
-    setSubmitting(true);
 
-    const form = new FormData(e.currentTarget);
-    const name = form.get("name") as string;
-    const category = form.get("category") as string;
-    const price = Number(form.get("price"));
-    const originalPrice = Number(form.get("originalPrice") || form.get("price"));
-    const stock = Number(form.get("stock"));
-
-    if (images.length === 0) {
+    if (form.images.length === 0) {
       setError("Upload at least one product image.");
-      setSubmitting(false);
       return;
     }
+
+    setSubmitting(true);
 
     try {
       const res = await fetch("/api/vendor/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          category,
-          price,
-          originalPrice,
-          images,
-          stock,
-        }),
+        body: JSON.stringify(productFormToPayload(form)),
       });
 
       const data = (await res.json()) as { error?: string; message?: string };
@@ -94,8 +84,7 @@ export function VendorProductsPanel() {
         data.message ??
           "Product submitted. An admin must approve it before it appears in the store."
       );
-      e.currentTarget.reset();
-      setImages([]);
+      setForm(emptyProductForm);
       await loadProducts();
     } catch {
       setError("Failed to submit product.");
@@ -125,97 +114,20 @@ export function VendorProductsPanel() {
           </p>
         )}
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="md:col-span-2">
-            <label
-              htmlFor="product-name"
-              className="text-sm font-medium text-foreground mb-1.5 block"
-            >
-              Product name <span className="text-coral">*</span>
-            </label>
-            <Input
-              id="product-name"
-              name="name"
-              required
-              placeholder="HydraGlow Serum"
-              className="h-11 rounded-lg"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="product-category"
-              className="text-sm font-medium text-foreground mb-1.5 block"
-            >
-              Category <span className="text-coral">*</span>
-            </label>
-            <select
-              id="product-category"
-              name="category"
-              required
-              className="flex h-11 w-full rounded-lg border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-            >
-              <option value="">Select category</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.name}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label
-              htmlFor="product-stock"
-              className="text-sm font-medium text-foreground mb-1.5 block"
-            >
-              Stock <span className="text-coral">*</span>
-            </label>
-            <Input
-              id="product-stock"
-              name="stock"
-              type="number"
-              min={0}
-              required
-              defaultValue={10}
-              className="h-11 rounded-lg"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="product-price"
-              className="text-sm font-medium text-foreground mb-1.5 block"
-            >
-              Price (₦) <span className="text-coral">*</span>
-            </label>
-            <Input
-              id="product-price"
-              name="price"
-              type="number"
-              min={1}
-              required
-              placeholder="35000"
-              className="h-11 rounded-lg"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="product-original-price"
-              className="text-sm font-medium text-foreground mb-1.5 block"
-            >
-              Original price (₦)
-            </label>
-            <Input
-              id="product-original-price"
-              name="originalPrice"
-              type="number"
-              min={1}
-              placeholder="Optional for discount"
-              className="h-11 rounded-lg"
-            />
-          </div>
-          <ProductImageUpload
-            images={images}
-            onChange={setImages}
+        <form
+          onSubmit={(e) => void handleSubmit(e)}
+          className="grid grid-cols-1 md:grid-cols-2 gap-4"
+        >
+          <ProductFormFields
+            form={form}
+            categories={categories}
             disabled={submitting}
+            onChange={(field, value) =>
+              setForm((prev) => ({ ...prev, [field]: value }))
+            }
+            onImagesChange={(images) =>
+              setForm((prev) => ({ ...prev, images }))
+            }
           />
           <Button
             type="submit"

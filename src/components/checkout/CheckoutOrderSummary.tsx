@@ -1,7 +1,7 @@
 "use client";
 
 import { Separator } from "@/components/ui/separator";
-import { formatNaira } from "@/lib/currency";
+import { useCurrency } from "@/store/currency-provider";
 import { useCart } from "@/store/cart-provider";
 
 interface CheckoutOrderSummaryProps {
@@ -10,6 +10,7 @@ interface CheckoutOrderSummaryProps {
 
 export function CheckoutOrderSummary({ shippingFee }: CheckoutOrderSummaryProps) {
   const { items, itemCount, subtotal, taxes, couponDiscount } = useCart();
+  const { formatFromNgn } = useCurrency();
   const total = subtotal + shippingFee + taxes - couponDiscount;
 
   return (
@@ -25,7 +26,7 @@ export function CheckoutOrderSummary({ shippingFee }: CheckoutOrderSummaryProps)
                 <span className="text-muted-foreground">× {item.quantity}</span>
               </span>
               <span className="font-medium shrink-0">
-                {formatNaira(item.price * item.quantity)}
+                {formatFromNgn(item.price * item.quantity)}
               </span>
             </li>
           ))}
@@ -40,26 +41,26 @@ export function CheckoutOrderSummary({ shippingFee }: CheckoutOrderSummaryProps)
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground">Sub Total</span>
           <span className="font-medium text-foreground">
-            {formatNaira(subtotal)}
+            {formatFromNgn(subtotal)}
           </span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground">Kwik Delivery</span>
           <span className="font-medium text-foreground">
-            {shippingFee > 0 ? formatNaira(shippingFee) : "Get quote"}
+            {shippingFee > 0 ? formatFromNgn(shippingFee) : "Get quote"}
           </span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground">Taxes</span>
           <span className="font-medium text-foreground">
-            {formatNaira(taxes)}
+            {formatFromNgn(taxes)}
           </span>
         </div>
         {couponDiscount > 0 && (
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Coupon Discount</span>
             <span className="font-medium text-checkout-green">
-              -{formatNaira(couponDiscount)}
+              -{formatFromNgn(couponDiscount)}
             </span>
           </div>
         )}
@@ -70,7 +71,7 @@ export function CheckoutOrderSummary({ shippingFee }: CheckoutOrderSummaryProps)
       <div className="flex items-center justify-between">
         <span className="text-base font-bold text-foreground">Total:</span>
         <span className="text-base font-bold text-foreground">
-          {formatNaira(total)}
+          {formatFromNgn(total)}
         </span>
       </div>
     </div>

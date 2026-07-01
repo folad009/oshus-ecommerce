@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import { SiteHeaderWrapper } from "@/components/SiteHeaderWrapper";
 import { CartProvider } from "@/store/cart-provider";
+import { CurrencyProvider } from "@/store/currency-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -40,10 +41,12 @@ export default function RootLayout({
         className="min-h-screen flex flex-col"
         suppressHydrationWarning
       >
-        <CartProvider>
-          <SiteHeaderWrapper />
-          {children}
-        </CartProvider>
+        <CurrencyProvider>
+          <CartProvider>
+            <SiteHeaderWrapper />
+            {children}
+          </CartProvider>
+        </CurrencyProvider>
       </body>
     </html>
   );

@@ -48,6 +48,7 @@ export function PaymentCallbackContent() {
             orderNumber: data.orderNumber ?? pending.orderNumber,
             customerName: data.customerName ?? pending.customerName,
             customerEmail: data.customerEmail ?? pending.customerEmail,
+            currency: pending.currency,
             items: pending.items,
             subtotal: pending.subtotal,
             shipping: pending.shipping,

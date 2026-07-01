@@ -43,6 +43,15 @@ export interface ShopProduct {
   images?: string[];
   rating: number;
   discount: string;
+  stock?: number;
+  sku?: string;
+  shortDescription?: string;
+  description?: string[];
+  descriptionBullets?: string[];
+  tags?: string[];
+  sizes?: string[];
+  additionalInfo?: { label: string; value: string }[];
+  inStock?: boolean;
 }
 
 export interface ProductDetail extends ShopProduct {

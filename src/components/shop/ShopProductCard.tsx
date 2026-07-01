@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Heart, Expand, ShoppingBag, Star } from "lucide-react";
 import type { ShopProduct } from "@/types";
-import { formatNaira } from "@/lib/currency";
+import { useCurrency } from "@/store/currency-provider";
 import { useCart } from "@/store/cart-provider";
 
 interface ShopProductCardProps {
@@ -17,6 +17,7 @@ export function ShopProductCard({
   showHoverActions = false,
 }: ShopProductCardProps) {
   const { addItem } = useCart();
+  const { formatFromNgn } = useCurrency();
 
   function handleAddToCart(event: React.MouseEvent) {
     event.preventDefault();
@@ -92,10 +93,10 @@ export function ShopProductCard({
 
       <div className="flex items-center gap-2">
         <span className="text-sm font-semibold text-forest">
-          {formatNaira(product.price)}
+          {formatFromNgn(product.price)}
         </span>
         <span className="text-xs text-muted-foreground line-through">
-          {formatNaira(product.originalPrice)}
+          {formatFromNgn(product.originalPrice)}
         </span>
       </div>
     </article>

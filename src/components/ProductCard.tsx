@@ -6,7 +6,7 @@ import { Heart, ShoppingCart, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Product } from "@/types";
-import { formatNaira } from "@/lib/currency";
+import { useCurrency } from "@/store/currency-provider";
 import { useCart } from "@/store/cart-provider";
 
 interface ProductCardProps {
@@ -16,6 +16,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, variant = "default" }: ProductCardProps) {
   const { addItem } = useCart();
+  const { formatFromNgn } = useCurrency();
   const detailHref = `/shop/${product.id}`;
 
   function handleAddToCart() {
@@ -71,11 +72,11 @@ export function ProductCard({ product, variant = "default" }: ProductCardProps) 
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm font-bold text-navy">
-            {formatNaira(product.price)}
+            {formatFromNgn(product.price)}
           </span>
           {product.originalPrice && (
             <span className="text-[10px] text-muted-foreground line-through">
-              {formatNaira(product.originalPrice)}
+              {formatFromNgn(product.originalPrice)}
             </span>
           )}
         </div>
@@ -135,11 +136,11 @@ export function ProductCard({ product, variant = "default" }: ProductCardProps) 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-lg font-bold text-navy">
-              {formatNaira(product.price)}
+              {formatFromNgn(product.price)}
             </span>
             {product.originalPrice && (
               <span className="text-xs text-muted-foreground line-through">
-                {formatNaira(product.originalPrice)}
+                {formatFromNgn(product.originalPrice)}
               </span>
             )}
           </div>

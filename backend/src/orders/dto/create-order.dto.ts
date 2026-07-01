@@ -63,6 +63,11 @@ export class CreateOrderDto {
   deliveryCity?: string;
 
   @IsOptional()
+  @IsString()
+  @IsIn(["NGN", "ZAR", "ngn", "zar"])
+  currency?: string;
+
+  @IsOptional()
   @IsNumber()
   deliveryLatitude?: number;
 

@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { formatNaira } from "@/lib/currency";
+import { Price } from "@/components/Price";
 import type { ShopProduct } from "@/types";
 
 const bannerStyles = [
@@ -102,7 +102,7 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
                     </Button>
                   ) : (
                     <span className={`${style.price} text-2xl font-bold`}>
-                      {formatNaira(product.price)}
+                      <Price amountNgn={product.price} />
                     </span>
                   )}
                   <div className="absolute bottom-0 right-0 w-32 h-32">

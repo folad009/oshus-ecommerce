@@ -4,6 +4,7 @@ export interface CompletedOrderSnapshot {
   orderNumber: string;
   customerName: string;
   customerEmail: string;
+  currency: "NGN" | "ZAR";
   items: CartItem[];
   subtotal: number;
   shipping: number;

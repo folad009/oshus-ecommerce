@@ -69,7 +69,7 @@ export class OpayService {
 
   async initializePayment(input: {
     email: string;
-    amountKobo: number;
+    amountMinor: number;
     reference: string;
     callbackUrl: string;
     returnUrl: string;
@@ -91,7 +91,7 @@ export class OpayService {
       country: "NG",
       reference: input.reference,
       amount: {
-        total: input.amountKobo,
+        total: input.amountMinor,
         currency: "NGN",
       },
       callbackUrl: input.callbackUrl,
