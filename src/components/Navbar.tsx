@@ -78,10 +78,10 @@ export function Navbar() {
               )}
             </Link>
             <Link
-              href="/account"
+              href="/login"
               className={cn(
                 buttonVariants({ variant: "ghost", size: "icon" }),
-                pathname === "/account" ? "text-brand" : "text-navy hover:text-brand"
+                pathname === "/login" ? "text-brand" : "text-navy hover:text-brand"
               )}
             >
               <User />
