@@ -65,18 +65,31 @@ export async function addVendorCatalogProduct(input: {
   const products = await getCatalogProducts();
   const price = Math.round(input.price);
   const originalPrice = Math.round(input.originalPrice);
+  const image = input.image.trim();
+  const category = input.category.trim();
+  const stock = Math.max(0, Math.round(input.stock));
+  const resolvedOriginalPrice = originalPrice > 0 ? originalPrice : price;
 
   const product: CatalogProduct = {
     id: `vendor-${Date.now()}`,
     vendorEmail: input.vendorEmail.trim().toLowerCase(),
     name: input.name.trim(),
-    category: input.category.trim(),
+    category,
     price,
-    originalPrice: originalPrice > 0 ? originalPrice : price,
-    image: input.image.trim(),
+    originalPrice: resolvedOriginalPrice,
+    image,
+    images: image ? [image] : [],
+    sku: "",
+    shortDescription: "",
+    description: [],
+    descriptionBullets: [],
+    tags: category ? [category] : [],
+    sizes: ["Standard"],
+    additionalInfo: [],
+    inStock: stock > 0,
     rating: 0,
-    discount: computeDiscount(price, originalPrice > 0 ? originalPrice : price),
-    stock: Math.max(0, Math.round(input.stock)),
+    discount: computeDiscount(price, resolvedOriginalPrice),
+    stock,
     status: "pending",
     submittedAt: new Date().toISOString().slice(0, 10),
   };
