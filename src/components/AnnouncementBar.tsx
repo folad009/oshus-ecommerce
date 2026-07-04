@@ -8,11 +8,11 @@ export function AnnouncementBar() {
   const { formatFromNgn } = useCurrency();
 
   return (
-    <div className="bg-navy text-white text-xs py-2 px-4">
+    <div className="bg-navy text-white text-lg py-5 px-4">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-6">
           <span className="flex items-center gap-1">
-            <MapPin className="size-3" />
+            <MapPin className="size-4" />
             Deliver to Lagos, Nigeria
           </span>
           <span className="hidden md:inline">

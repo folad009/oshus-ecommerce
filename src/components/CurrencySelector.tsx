@@ -18,7 +18,7 @@ export function CurrencySelector({ className }: CurrencySelectorProps) {
       <select
         value={currency}
         onChange={(event) => setCurrency(event.target.value as StoreCurrency)}
-        className="appearance-none bg-transparent text-white text-xs pr-5 cursor-pointer focus:outline-none"
+        className="appearance-none bg-transparent text-white text-sm pr-5 cursor-pointer focus:outline-none"
         aria-label="Currency"
       >
         {CURRENCY_OPTIONS.map((option) => (

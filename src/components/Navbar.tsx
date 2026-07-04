@@ -31,7 +31,7 @@ export function Navbar() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "text-sm font-medium transition-colors",
+                  "text-lg font-bold transition-colors",
                   pathname === link.href
                     ? "text-brand"
                     : "text-navy hover:text-brand"

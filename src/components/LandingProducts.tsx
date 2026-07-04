@@ -1,49 +1,38 @@
-"use client";
+import { LandingProductsClient } from "@/components/LandingProductsClient";
+import {
+  buildSidebarCategories,
+  getApprovedShopProducts,
+  getShopCategoryRecords,
+  shopProductToProduct,
+} from "@/lib/shop-catalog";
 
-import { useMemo, useState } from "react";
-import { CategoryTabs } from "@/components/CategoryTabs";
-import { SpecialOfferSection } from "@/components/SpecialOfferSection";
-import { FeaturedProducts } from "@/components/FeaturedProducts";
-import { CategoriesSection } from "@/components/CategoriesSection";
-import type { Product, ShopProduct } from "@/types";
+export async function LandingProducts() {
+  const [shopProducts, categoryRecords] = await Promise.all([
+    getApprovedShopProducts(),
+    getShopCategoryRecords(),
+  ]);
 
-interface LandingProductsProps {
-  products: Product[];
-  featuredProducts: ShopProduct[];
-  categories: string[];
-}
+  const products = shopProducts.map(shopProductToProduct);
+  const categoryTabs =
+    categoryRecords.length > 0
+      ? categoryRecords.map((category) => category.name)
+      : [...new Set(products.map((product) => product.category))];
 
-export function LandingProducts({
-  products,
-  featuredProducts,
-  categories,
-}: LandingProductsProps) {
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const featuredProducts = [...shopProducts].sort(
+    (a, b) => b.rating - a.rating
+  );
 
-  const tabs = useMemo(() => {
-    if (categories.length > 0) {
-      return categories;
-    }
-    return [...new Set(products.map((product) => product.category))];
-  }, [categories, products]);
-
-  const filteredProducts = useMemo(() => {
-    if (!activeCategory) {
-      return products.slice(0, 8);
-    }
-    return products.filter((product) => product.category === activeCategory);
-  }, [activeCategory, products]);
+  const sidebarCategories = buildSidebarCategories(
+    shopProducts,
+    categoryRecords
+  );
 
   return (
-    <>
-      <CategoryTabs
-        categories={tabs}
-        activeCategory={activeCategory}
-        onCategoryChange={setActiveCategory}
-      />
-      <SpecialOfferSection products={products} />
-      <FeaturedProducts products={featuredProducts} />
-      <CategoriesSection products={filteredProducts} />
-    </>
+    <LandingProductsClient
+      products={products}
+      featuredProducts={featuredProducts}
+      categoryTabs={categoryTabs}
+      sidebarCategories={sidebarCategories}
+    />
   );
 }

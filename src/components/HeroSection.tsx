@@ -33,12 +33,10 @@ export function HeroSection({ productImages = [] }: HeroSectionProps) {
             <span className="inline-block bg-brand/20 text-brand text-xs font-semibold px-3 py-1 rounded-full mb-4">
               ✦ Trending
             </span>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4">
-              Welcome To
-              <br />
-              <span className="text-brand">OshusStore</span>
+            <h1 className="text-5xl md:text-6xl lg:text-8xl font-bold leading-tight mb-4">
+              Welcome To {" "}<span className="text-brand">OshusStore</span>
             </h1>
-            <p className="text-white/70 text-base md:text-lg mb-8 max-w-md">
+            <p className="text-white/70 text-base md:text-2xl mb-8 max-w-7xl">
               Discover premium beauty and wellness products at unbeatable
               prices, delivered to your door.
             </p>
@@ -126,17 +124,17 @@ export function HeroSection({ productImages = [] }: HeroSectionProps) {
 
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex flex-wrap items-center justify-center gap-8 text-white/60 text-xs">
+          <div className="flex flex-wrap items-center justify-center gap-8 text-white/60 text-lg font-bold">
             <div className="flex items-center gap-2">
-              <Truck className="size-4" />
+              <Truck className="size-6" />
               <span>Free Delivery Over ₦50k</span>
             </div>
             <div className="flex items-center gap-2">
-              <Clock className="size-4" />
+              <Clock className="size-6" />
               <span>Same Day Delivery</span>
             </div>
             <div className="flex items-center gap-2">
-              <ShieldCheck className="size-4" />
+              <ShieldCheck className="size-6" />
               <span>Secure Payments</span>
             </div>
           </div>

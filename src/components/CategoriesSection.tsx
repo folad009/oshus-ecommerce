@@ -1,12 +1,16 @@
 import { ProductCard } from "@/components/ProductCard";
 import { Sidebar } from "@/components/Sidebar";
-import type { Product } from "@/types";
+import type { Category, Product } from "@/types";
 
 interface CategoriesSectionProps {
   products: Product[];
+  categories?: Category[];
 }
 
-export function CategoriesSection({ products }: CategoriesSectionProps) {
+export function CategoriesSection({
+  products,
+  categories = [],
+}: CategoriesSectionProps) {
   return (
     <section className="py-10">
       <div className="max-w-7xl mx-auto px-4">
@@ -28,7 +32,7 @@ export function CategoriesSection({ products }: CategoriesSectionProps) {
           </div>
 
           <div className="lg:col-span-4">
-            <Sidebar />
+            <Sidebar categories={categories} />
           </div>
         </div>
       </div>

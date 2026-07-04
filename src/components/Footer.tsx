@@ -96,15 +96,15 @@ export function Footer() {
               </Button>
             </div>
             <div className="flex flex-col gap-2 mt-4">
-              <div className="flex items-center gap-2 text-white/60 text-xs">
+              <div className="flex items-center gap-2 text-white/60 text-sm">
                 <MapPin className="size-3 shrink-0" />
                 <span>Lagos, Nigeria</span>
               </div>
-              <div className="flex items-center gap-2 text-white/60 text-xs">
+              <div className="flex items-center gap-2 text-white/60 text-sm">
                 <Phone className="size-3 shrink-0" />
                 <span>+234 800 123 4567</span>
               </div>
-              <div className="flex items-center gap-2 text-white/60 text-xs">
+              <div className="flex items-center gap-2 text-white/60 text-sm">
                 <Mail className="size-3 shrink-0" />
                 <span>hello@oshusstore.com</span>
               </div>
@@ -114,7 +114,7 @@ export function Footer() {
 
         <Separator className="bg-white/10" />
 
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 text-white/40 text-xs">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 text-white/40 text-lg">
           <span>&copy; 2026 Oshus Store. All rights reserved.</span>
           <div className="flex gap-4">
             <span>Visa</span>
