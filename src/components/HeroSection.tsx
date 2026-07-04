@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Truck, Clock, ShieldCheck, ArrowRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface HeroSectionProps {
   productImages?: string[];
@@ -41,15 +42,16 @@ export function HeroSection({ productImages = [] }: HeroSectionProps) {
               Discover premium beauty and wellness products at unbeatable
               prices, delivered to your door.
             </p>
-            <Button
-              className="bg-brand hover:bg-brand-dark text-white rounded-full px-8 h-12 text-base font-semibold gap-2"
-              asChild
+            <Link
+              href="/shop"
+              className={cn(
+                buttonVariants(),
+                "bg-brand hover:bg-brand-dark text-white rounded-full px-8 h-12 text-base font-semibold gap-2"
+              )}
             >
-              <Link href="/shop">
-                Start Shopping
-                <ArrowRight className="size-4" />
-              </Link>
-            </Button>
+              Start Shopping
+              <ArrowRight className="size-4" />
+            </Link>
           </div>
 
           <div className="relative">

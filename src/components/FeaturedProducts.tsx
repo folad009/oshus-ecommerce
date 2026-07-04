@@ -1,8 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Price } from "@/components/Price";
+import { cn } from "@/lib/utils";
 import type { ShopProduct } from "@/types";
 
 const bannerStyles = [
@@ -55,16 +56,16 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
                 <ChevronRight className="size-4" />
               </button>
             </div>
-            <Button
-              variant="ghost"
-              className="text-coral text-sm font-semibold hover:text-coral-dark gap-1"
-              asChild
+            <Link
+              href="/shop"
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "text-coral text-sm font-semibold hover:text-coral-dark gap-1"
+              )}
             >
-              <Link href="/shop">
-                See all
-                <ArrowRight className="size-3.5" />
-              </Link>
-            </Button>
+              See all
+              <ArrowRight className="size-3.5" />
+            </Link>
           </div>
         </div>
 

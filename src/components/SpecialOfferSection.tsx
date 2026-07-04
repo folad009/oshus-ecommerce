@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { ProductCard } from "@/components/ProductCard";
+import { cn } from "@/lib/utils";
 import type { Product } from "@/types";
 
 interface SpecialOfferSectionProps {
@@ -35,12 +36,15 @@ export function SpecialOfferSection({ products }: SpecialOfferSectionProps) {
                 <br />
                 Best Picks!
               </h2>
-              <Button
-                className="bg-brand hover:bg-brand-dark text-white rounded-full px-6 h-10 text-sm font-semibold"
-                asChild
+              <Link
+                href="/shop"
+                className={cn(
+                  buttonVariants(),
+                  "bg-brand hover:bg-brand-dark text-white rounded-full px-6 h-10 text-sm font-semibold"
+                )}
               >
-                <Link href="/shop">Shop all deals</Link>
-              </Button>
+                Shop all deals
+              </Link>
             </div>
             {heroProduct && (
               <div className="absolute bottom-0 right-0 w-48 h-48 lg:w-56 lg:h-80">
