@@ -22,11 +22,19 @@ export function ShopProductCard({
   function handleAddToCart(event: React.MouseEvent) {
     event.preventDefault();
     event.stopPropagation();
+    const defaultVariant = product.variants?.find((variant) => variant.stock > 0)
+      ?? product.variants?.[0];
+
     addItem({
-      id: product.id,
-      name: product.name,
+      id: defaultVariant?.id ?? product.id,
+      productId: product.id,
+      variantId: defaultVariant?.id,
+      variantLabel: defaultVariant?.label,
+      name: defaultVariant
+        ? `${product.name} (${defaultVariant.label})`
+        : product.name,
       category: product.category,
-      price: product.price,
+      price: defaultVariant?.price ?? product.price,
       image: product.image,
     });
   }

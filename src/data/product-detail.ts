@@ -18,6 +18,7 @@ async function buildProductDetail(
     sku: base.sku || `SKU-${id.slice(0, 8).toUpperCase()}`,
     tags: base.tags && base.tags.length > 0 ? base.tags : [base.category],
     sizes: base.sizes && base.sizes.length > 0 ? base.sizes : ["Standard"],
+    variants: base.variants ?? [],
     images: galleryImages,
     inStock: base.inStock ?? (base.stock ?? 0) > 0,
     shortDescription:

@@ -1,3 +1,4 @@
+import { Type } from "class-transformer";
 import {
   ArrayMaxSize,
   ArrayMinSize,
@@ -8,8 +9,10 @@ import {
   IsUrl,
   Min,
   ValidateIf,
+  ValidateNested,
 } from "class-validator";
 import { ProductDetailsFieldsDto } from "./product-details.dto";
+import { ProductVariantDto } from "./product-variant.dto";
 
 export class CreateProductDto extends ProductDetailsFieldsDto {
   @IsString()
@@ -43,4 +46,10 @@ export class CreateProductDto extends ProductDetailsFieldsDto {
   @IsInt()
   @Min(0)
   stock!: number;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductVariantDto)
+  variants?: ProductVariantDto[];
 }

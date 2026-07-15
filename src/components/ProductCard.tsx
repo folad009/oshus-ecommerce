@@ -22,6 +22,7 @@ export function ProductCard({ product, variant = "default" }: ProductCardProps) 
   function handleAddToCart() {
     addItem({
       id: product.id,
+      productId: product.id,
       name: product.name,
       category: product.category,
       price: product.price,

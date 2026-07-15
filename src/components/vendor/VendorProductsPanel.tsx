@@ -128,6 +128,9 @@ export function VendorProductsPanel() {
             onImagesChange={(images) =>
               setForm((prev) => ({ ...prev, images }))
             }
+            onVariantsChange={(variants) =>
+              setForm((prev) => ({ ...prev, variants }))
+            }
           />
           <Button
             type="submit"

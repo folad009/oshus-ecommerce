@@ -1,4 +1,4 @@
-import type { ShopProduct } from "@/types";
+import type { ProductVariant, ShopProduct } from "@/types";
 
 export type ProductApprovalStatus = "pending" | "approved" | "rejected";
 
@@ -19,6 +19,7 @@ export interface CatalogProduct {
   descriptionBullets: string[];
   tags: string[];
   sizes: string[];
+  variants?: ProductVariant[];
   additionalInfo: AdditionalInfoRow[];
   inStock: boolean;
   rating: number;
@@ -65,6 +66,7 @@ export function catalogToShopProduct(product: CatalogProduct): ShopProduct {
     descriptionBullets: product.descriptionBullets,
     tags: product.tags,
     sizes: product.sizes,
+    variants: product.variants,
     additionalInfo: product.additionalInfo,
     inStock: product.inStock,
   };

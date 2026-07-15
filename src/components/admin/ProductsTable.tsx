@@ -221,6 +221,9 @@ export function ProductsTable({
               onImagesChange={(images) =>
                 setAddForm((prev) => ({ ...prev, images }))
               }
+              onVariantsChange={(variants) =>
+                setAddForm((prev) => ({ ...prev, variants }))
+              }
             />
             <div className="md:col-span-2 flex gap-3">
               <Button
@@ -265,6 +268,9 @@ export function ProductsTable({
               }
               onImagesChange={(images) =>
                 setEditForm((prev) => ({ ...prev, images }))
+              }
+              onVariantsChange={(variants) =>
+                setEditForm((prev) => ({ ...prev, variants }))
               }
             />
             <div className="md:col-span-2 flex gap-3">

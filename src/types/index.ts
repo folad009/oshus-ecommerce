@@ -33,6 +33,18 @@ export interface FeaturedBanner {
   cta?: string;
 }
 
+export interface ProductVariant {
+  id: string;
+  sku: string;
+  weight: string;
+  packSize: string;
+  flavour: string;
+  price: number;
+  originalPrice: number;
+  stock: number;
+  label: string;
+}
+
 export interface ShopProduct {
   id: string;
   name: string;
@@ -50,6 +62,7 @@ export interface ShopProduct {
   descriptionBullets?: string[];
   tags?: string[];
   sizes?: string[];
+  variants?: ProductVariant[];
   additionalInfo?: { label: string; value: string }[];
   inStock?: boolean;
 }
@@ -59,6 +72,7 @@ export interface ProductDetail extends ShopProduct {
   sku: string;
   tags: string[];
   sizes: string[];
+  variants: ProductVariant[];
   images: string[];
   inStock: boolean;
   shortDescription: string;
@@ -69,6 +83,9 @@ export interface ProductDetail extends ShopProduct {
 
 export interface CartItem {
   id: string;
+  productId: string;
+  variantId?: string;
+  variantLabel?: string;
   name: string;
   category: string;
   price: number;

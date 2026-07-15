@@ -141,7 +141,9 @@ export function PaymentMethods({
             quantity: item.quantity,
             unitPrice: item.price,
             image: item.image,
-            productId: item.id,
+            productId: item.productId || item.id,
+            variantId: item.variantId,
+            variantLabel: item.variantLabel,
           })),
         }),
       });

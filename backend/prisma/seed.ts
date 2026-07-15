@@ -1,3 +1,5 @@
+import "dotenv/config";
+import { PrismaPg } from "@prisma/adapter-pg";
 import {
   OrderStatus,
   PrismaClient,
@@ -9,7 +11,14 @@ import {
 } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 
-const prisma = new PrismaClient();
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  throw new Error("DATABASE_URL is not set.");
+}
+
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({ connectionString }),
+});
 
 const orderSeeds = [
   {
@@ -210,6 +219,7 @@ async function main() {
     "Fragrances",
     "Nail Care",
     "Body Care",
+    "Snacks",
   ] as const;
 
   for (const user of users) {
@@ -277,6 +287,95 @@ async function main() {
       discount: "13%",
       stock: 42,
       status: ProductStatus.APPROVED,
+    },
+  });
+
+  const snackVariants = [
+    {
+      sku: "LAY-36-1-SALTED",
+      weight: "36 g",
+      packSize: "1",
+      flavour: "Salted",
+      price: 1_200,
+      originalPrice: 1_500,
+      stock: 80,
+    },
+    {
+      sku: "LAY-36-48-SOC",
+      weight: "36 g",
+      packSize: "48",
+      flavour: "Spring Onion & Cheese",
+      price: 45_000,
+      originalPrice: 52_000,
+      stock: 24,
+    },
+    {
+      sku: "LAY-36-48-SALTED",
+      weight: "36 g",
+      packSize: "48",
+      flavour: "Salted",
+      price: 42_000,
+      originalPrice: 48_000,
+      stock: 18,
+    },
+    {
+      sku: "LAY-120-20-BBQ",
+      weight: "120 g",
+      packSize: "20",
+      flavour: "Sweet & Smokey American BBQ",
+      price: 38_000,
+      originalPrice: 44_000,
+      stock: 15,
+    },
+  ] as const;
+
+  await prisma.product.upsert({
+    where: { id: "seed-lays-chips" },
+    update: {
+      vendorId: vendor.id,
+      name: "Lay's Chips",
+      category: "Snacks",
+      price: 1_200,
+      originalPrice: 1_500,
+      image:
+        "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=800&h=800&fit=crop",
+      images: [
+        "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=800&h=800&fit=crop",
+      ],
+      shortDescription:
+        "Crispy potato chips available in multiple pack sizes and flavours.",
+      sizes: ["36 g", "120 g"],
+      rating: 4.6,
+      discount: "20%",
+      stock: snackVariants.reduce((sum, variant) => sum + variant.stock, 0),
+      status: ProductStatus.APPROVED,
+      variants: {
+        deleteMany: {},
+        create: [...snackVariants],
+      },
+    },
+    create: {
+      id: "seed-lays-chips",
+      vendorId: vendor.id,
+      name: "Lay's Chips",
+      category: "Snacks",
+      price: 1_200,
+      originalPrice: 1_500,
+      image:
+        "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=800&h=800&fit=crop",
+      images: [
+        "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=800&h=800&fit=crop",
+      ],
+      shortDescription:
+        "Crispy potato chips available in multiple pack sizes and flavours.",
+      sizes: ["36 g", "120 g"],
+      rating: 4.6,
+      discount: "20%",
+      stock: snackVariants.reduce((sum, variant) => sum + variant.stock, 0),
+      status: ProductStatus.APPROVED,
+      variants: {
+        create: [...snackVariants],
+      },
     },
   });
 

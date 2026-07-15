@@ -4,14 +4,22 @@ import { Input } from "@/components/ui/input";
 import type { ShopCategory } from "@/data/shop-categories";
 import type { ProductFormData } from "@/lib/product-form";
 import { ProductImageUpload } from "@/components/products/ProductImageUpload";
+import { ProductVariantEditor } from "@/components/products/ProductVariantEditor";
+import type { ProductVariantOption } from "@/lib/product-variants";
 
 const textareaClassName =
   "flex min-h-[88px] w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] resize-y";
 
+type ProductFormTextField = Exclude<
+  keyof ProductFormData,
+  "images" | "variants"
+>;
+
 interface ProductFormFieldsProps {
   form: ProductFormData;
-  onChange: (field: keyof ProductFormData, value: string) => void;
+  onChange: (field: ProductFormTextField, value: string) => void;
   onImagesChange: (images: string[]) => void;
+  onVariantsChange: (variants: ProductVariantOption[]) => void;
   showVendorEmail?: boolean;
   categories: ShopCategory[];
   disabled?: boolean;
@@ -21,6 +29,7 @@ export function ProductFormFields({
   form,
   onChange,
   onImagesChange,
+  onVariantsChange,
   showVendorEmail,
   categories,
   disabled,
@@ -87,10 +96,15 @@ export function ProductFormFields({
           min={0}
           value={form.stock}
           onChange={(e) => onChange("stock", e.target.value)}
-          required
+          required={form.variants.length === 0}
           className="h-11 rounded-lg"
-          disabled={disabled}
+          disabled={disabled || form.variants.length > 0}
         />
+        {form.variants.length > 0 && (
+          <p className="text-xs text-muted-foreground mt-1">
+            Synced from variant stocks
+          </p>
+        )}
       </div>
 
       <div>
@@ -102,11 +116,16 @@ export function ProductFormFields({
           min={1}
           value={form.price}
           onChange={(e) => onChange("price", e.target.value)}
-          required
+          required={form.variants.length === 0}
           placeholder="35000"
           className="h-11 rounded-lg"
-          disabled={disabled}
+          disabled={disabled || form.variants.length > 0}
         />
+        {form.variants.length > 0 && (
+          <p className="text-xs text-muted-foreground mt-1">
+            Listing price uses the cheapest variant
+          </p>
+        )}
       </div>
 
       <div>
@@ -120,9 +139,15 @@ export function ProductFormFields({
           onChange={(e) => onChange("originalPrice", e.target.value)}
           placeholder="Optional for discount"
           className="h-11 rounded-lg"
-          disabled={disabled}
+          disabled={disabled || form.variants.length > 0}
         />
       </div>
+
+      <ProductVariantEditor
+        variants={form.variants}
+        onChange={onVariantsChange}
+        disabled={disabled}
+      />
 
       {showVendorEmail && (
         <div className="md:col-span-2">
@@ -210,16 +235,20 @@ export function ProductFormFields({
 
       <div>
         <label className="text-sm font-medium text-foreground mb-1.5 block">
-          Sizes / variants
+          Simple sizes (optional)
         </label>
         <Input
           value={form.sizesText}
           onChange={(e) => onChange("sizesText", e.target.value)}
           placeholder="30 ml, 60 ml, 100 ml"
           className="h-11 rounded-lg"
-          disabled={disabled}
+          disabled={disabled || form.variants.length > 0}
         />
-        <p className="text-xs text-muted-foreground mt-1">Comma-separated</p>
+        <p className="text-xs text-muted-foreground mt-1">
+          {form.variants.length > 0
+            ? "Ignored when pack option variants are set"
+            : "Comma-separated labels only (no separate prices)"}
+        </p>
       </div>
 
       <div className="md:col-span-2">

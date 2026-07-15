@@ -18,6 +18,17 @@ import {
 } from "./product-details.util";
 import type { ProductDetailsFieldsDto } from "./dto/product-details.dto";
 import type { Prisma } from "@prisma/client";
+import {
+  deriveProductPricing,
+  formatVariants,
+  normalizeVariants,
+  type NormalizedVariant,
+} from "./product-variants.util";
+
+const variantInclude = {
+  variants: { orderBy: [{ flavour: "asc" }, { weight: "asc" }, { packSize: "asc" }] },
+  vendor: { select: { email: true } },
+} satisfies Prisma.ProductInclude;
 
 function buildDetailsData(dto: ProductDetailsFieldsDto): {
   sku: string;
@@ -89,6 +100,16 @@ function formatProduct(product: {
   status: ProductStatus;
   submittedAt: Date;
   reviewedAt: Date | null;
+  variants?: Array<{
+    id: string;
+    sku: string;
+    weight: string;
+    packSize: string;
+    flavour: string;
+    price: number;
+    originalPrice: number;
+    stock: number;
+  }>;
 }) {
   const statusMap: Record<ProductStatus, "pending" | "approved" | "rejected"> =
     {
@@ -96,6 +117,9 @@ function formatProduct(product: {
       [ProductStatus.APPROVED]: "approved",
       [ProductStatus.REJECTED]: "rejected",
     };
+
+  const variants = formatVariants(product.variants ?? []);
+  const details = formatProductDetails(product);
 
   return {
     id: product.id,
@@ -106,7 +130,16 @@ function formatProduct(product: {
     originalPrice: product.originalPrice,
     image: product.image,
     images: product.images.length > 0 ? product.images : [product.image],
-    ...formatProductDetails(product),
+    ...details,
+    sizes:
+      variants.length > 0
+        ? [
+            ...new Set(
+              variants.map((variant) => variant.weight).filter(Boolean)
+            ),
+          ]
+        : details.sizes,
+    variants,
     rating: product.rating,
     discount: product.discount,
     stock: product.stock,
@@ -135,13 +168,36 @@ export class ProductsService {
     return vendor;
   }
 
+  private async resolveCategory(name: string) {
+    try {
+      return await this.categoriesService.assertValidCategory(name);
+    } catch {
+      throw new UnprocessableEntityException("Invalid category.");
+    }
+  }
+
+  private async replaceVariants(productId: string, variants: NormalizedVariant[]) {
+    await this.prisma.productVariant.deleteMany({ where: { productId } });
+
+    if (variants.length === 0) {
+      return;
+    }
+
+    await this.prisma.productVariant.createMany({
+      data: variants.map((variant) => ({
+        productId,
+        ...variant,
+      })),
+    });
+  }
+
   async listVendorProducts(vendorId: string) {
     await this.findVendor(vendorId);
 
     const products = await this.prisma.product.findMany({
       where: { vendorId },
       orderBy: { submittedAt: "desc" },
-      include: { vendor: { select: { email: true } } },
+      include: variantInclude,
     });
 
     return products.map((product) =>
@@ -152,22 +208,24 @@ export class ProductsService {
     );
   }
 
-  private async resolveCategory(name: string) {
-    try {
-      return await this.categoriesService.assertValidCategory(name);
-    } catch {
-      throw new UnprocessableEntityException("Invalid category.");
-    }
-  }
-
   async createVendorProduct(vendorId: string, dto: CreateProductDto) {
     const vendor = await this.findVendor(vendorId);
     const category = await this.resolveCategory(dto.category);
+    const variants = normalizeVariants(dto.variants);
+    const derived = deriveProductPricing(variants);
 
-    const price = Math.round(dto.price);
-    const originalPrice = Math.round(dto.originalPrice);
+    const price = derived?.price ?? Math.round(dto.price);
+    const originalPrice = derived?.originalPrice ?? Math.round(dto.originalPrice);
+    const stock = derived?.stock ?? Math.max(0, Math.round(dto.stock));
     const { image, images } = resolveProductImages(dto);
     const details = buildDetailsData(dto);
+
+    if (derived?.sizes.length) {
+      details.sizes = derived.sizes;
+    }
+    if (derived?.sku) {
+      details.sku = derived.sku;
+    }
 
     const product = await this.prisma.product.create({
       data: {
@@ -179,11 +237,18 @@ export class ProductsService {
         image,
         images,
         ...details,
-        stock: Math.max(0, Math.round(dto.stock)),
+        stock,
         discount: computeDiscount(price, originalPrice),
         status: ProductStatus.PENDING,
+        ...(variants.length > 0
+          ? {
+              variants: {
+                create: variants,
+              },
+            }
+          : {}),
       },
-      include: { vendor: { select: { email: true } } },
+      include: variantInclude,
     });
 
     return formatProduct({
@@ -195,7 +260,7 @@ export class ProductsService {
   async listAdminProducts() {
     const products = await this.prisma.product.findMany({
       orderBy: { submittedAt: "desc" },
-      include: { vendor: { select: { email: true } } },
+      include: variantInclude,
     });
 
     return products.map((product) =>
@@ -209,7 +274,7 @@ export class ProductsService {
   async updateProductStatus(id: string, status: "approved" | "rejected") {
     const existing = await this.prisma.product.findUnique({
       where: { id },
-      include: { vendor: { select: { email: true } } },
+      include: variantInclude,
     });
 
     if (!existing) {
@@ -228,7 +293,7 @@ export class ProductsService {
           ? { rating: 4.5 }
           : {}),
       },
-      include: { vendor: { select: { email: true } } },
+      include: variantInclude,
     });
 
     return formatProduct({
@@ -266,11 +331,21 @@ export class ProductsService {
     }
 
     const category = await this.resolveCategory(dto.category);
+    const variants = normalizeVariants(dto.variants);
+    const derived = deriveProductPricing(variants);
 
-    const price = Math.round(dto.price);
-    const originalPrice = Math.round(dto.originalPrice);
+    const price = derived?.price ?? Math.round(dto.price);
+    const originalPrice = derived?.originalPrice ?? Math.round(dto.originalPrice);
+    const stock = derived?.stock ?? Math.max(0, Math.round(dto.stock));
     const { image, images } = resolveProductImages(dto);
     const details = buildDetailsData(dto);
+
+    if (derived?.sizes.length) {
+      details.sizes = derived.sizes;
+    }
+    if (derived?.sku) {
+      details.sku = derived.sku;
+    }
 
     const product = await this.prisma.product.create({
       data: {
@@ -282,13 +357,20 @@ export class ProductsService {
         image,
         images,
         ...details,
-        stock: Math.max(0, Math.round(dto.stock)),
+        stock,
         discount: computeDiscount(price, originalPrice),
         status: ProductStatus.APPROVED,
         reviewedAt: new Date(),
         rating: 4.5,
+        ...(variants.length > 0
+          ? {
+              variants: {
+                create: variants,
+              },
+            }
+          : {}),
       },
-      include: { vendor: { select: { email: true } } },
+      include: variantInclude,
     });
 
     return formatProduct({
@@ -300,7 +382,7 @@ export class ProductsService {
   async updateProduct(id: string, dto: UpdateProductDto) {
     const existing = await this.prisma.product.findUnique({
       where: { id },
-      include: { vendor: { select: { email: true } } },
+      include: variantInclude,
     });
 
     if (!existing) {
@@ -312,11 +394,23 @@ export class ProductsService {
       category = await this.resolveCategory(dto.category);
     }
 
-    const price = dto.price !== undefined ? Math.round(dto.price) : existing.price;
+    const variants =
+      dto.variants !== undefined ? normalizeVariants(dto.variants) : null;
+    const derived = variants ? deriveProductPricing(variants) : null;
+
+    const price =
+      derived?.price ??
+      (dto.price !== undefined ? Math.round(dto.price) : existing.price);
     const originalPrice =
-      dto.originalPrice !== undefined
+      derived?.originalPrice ??
+      (dto.originalPrice !== undefined
         ? Math.round(dto.originalPrice)
-        : existing.originalPrice;
+        : existing.originalPrice);
+    const stock =
+      derived?.stock ??
+      (dto.stock !== undefined
+        ? Math.max(0, Math.round(dto.stock))
+        : existing.stock);
 
     const imageUpdate =
       dto.images !== undefined || dto.image !== undefined
@@ -326,25 +420,33 @@ export class ProductsService {
           })
         : null;
 
+    const detailsPatch = buildDetailsPatch(dto);
+    if (derived?.sizes.length) {
+      detailsPatch.sizes = derived.sizes;
+    }
+    if (derived?.sku) {
+      detailsPatch.sku = derived.sku;
+    }
+
+    if (variants) {
+      await this.replaceVariants(id, variants);
+    }
+
     const product = await this.prisma.product.update({
       where: { id },
       data: {
         ...(dto.name !== undefined ? { name: dto.name.trim() } : {}),
         ...(category !== undefined ? { category } : {}),
-        ...(dto.price !== undefined ? { price } : {}),
-        ...(dto.originalPrice !== undefined ? { originalPrice } : {}),
+        price,
+        originalPrice,
+        stock,
         ...(imageUpdate
           ? { image: imageUpdate.image, images: imageUpdate.images }
           : {}),
-        ...(dto.stock !== undefined
-          ? { stock: Math.max(0, Math.round(dto.stock)) }
-          : {}),
-        ...buildDetailsPatch(dto),
-        ...(dto.price !== undefined || dto.originalPrice !== undefined
-          ? { discount: computeDiscount(price, originalPrice) }
-          : {}),
+        ...detailsPatch,
+        discount: computeDiscount(price, originalPrice),
       },
-      include: { vendor: { select: { email: true } } },
+      include: variantInclude,
     });
 
     return formatProduct({
@@ -369,10 +471,16 @@ export class ProductsService {
     const products = await this.prisma.product.findMany({
       where: { status: ProductStatus.APPROVED },
       orderBy: { submittedAt: "desc" },
+      include: {
+        variants: {
+          orderBy: [{ flavour: "asc" }, { weight: "asc" }, { packSize: "asc" }],
+        },
+      },
     });
 
     return products.map((product) => {
       const details = formatProductDetails(product);
+      const variants = formatVariants(product.variants);
 
       return {
         id: product.id,
@@ -390,9 +498,20 @@ export class ProductsService {
         description: details.description,
         descriptionBullets: details.descriptionBullets,
         tags: details.tags,
-        sizes: details.sizes,
+        sizes:
+          variants.length > 0
+            ? [
+                ...new Set(
+                  variants.map((variant) => variant.weight).filter(Boolean)
+                ),
+              ]
+            : details.sizes,
+        variants,
         additionalInfo: details.additionalInfo,
-        inStock: details.inStock,
+        inStock:
+          variants.length > 0
+            ? variants.some((variant) => variant.stock > 0)
+            : details.inStock,
       };
     });
   }

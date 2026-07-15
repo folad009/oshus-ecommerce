@@ -3,6 +3,7 @@ import type { CartItem } from "@/types";
 export const cartItems: CartItem[] = [
   {
     id: "cart-1",
+    productId: "cart-1",
     name: "Monstera deliciosa",
     category: "Indoor Plant",
     price: 12500,
@@ -12,6 +13,7 @@ export const cartItems: CartItem[] = [
   },
   {
     id: "cart-2",
+    productId: "cart-2",
     name: "Snake Plant Laurentii",
     category: "Indoor Plant",
     price: 18000,
@@ -21,6 +23,7 @@ export const cartItems: CartItem[] = [
   },
   {
     id: "cart-3",
+    productId: "cart-3",
     name: "Fiddle Leaf Fig",
     category: "Indoor Plant",
     price: 24000,
@@ -30,6 +33,7 @@ export const cartItems: CartItem[] = [
   },
   {
     id: "cart-4",
+    productId: "cart-4",
     name: "Peace Lily",
     category: "Indoor Plant",
     price: 15000,

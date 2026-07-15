@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum Role {
@@ -105,9 +104,29 @@ model Product {
   submittedAt   DateTime      @default(now()) @db.Date
   reviewedAt    DateTime?     @db.Date
   orderItems    OrderItem[]
+  variants      ProductVariant[]
 
   @@index([vendorId])
   @@index([status])
+}
+
+model ProductVariant {
+  id            String   @id @default(cuid())
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku           String   @default("")
+  weight        String   @default("")
+  packSize      String   @default("")
+  flavour       String   @default("")
+  price         Int
+  originalPrice Int
+  stock         Int
+  orderItems    OrderItem[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([productId, weight, packSize, flavour])
+  @@index([productId])
 }
 
 model Order {
@@ -145,21 +164,25 @@ model Order {
 }
 
 model OrderItem {
-  id        String   @id @default(cuid())
-  orderId   String
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  vendorId  String?
-  vendor    User?    @relation("VendorOrderItems", fields: [vendorId], references: [id], onDelete: SetNull)
-  productId String?
-  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
-  name      String
-  sku       String   @default("")
-  quantity  Int
-  unitPrice Int
-  image     String?
+  id           String          @id @default(cuid())
+  orderId      String
+  order        Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  vendorId     String?
+  vendor       User?           @relation("VendorOrderItems", fields: [vendorId], references: [id], onDelete: SetNull)
+  productId    String?
+  product      Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  variantId    String?
+  variant      ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  variantLabel String          @default("")
+  name         String
+  sku          String          @default("")
+  quantity     Int
+  unitPrice    Int
+  image        String?
 
   @@index([orderId])
   @@index([vendorId])
+  @@index([variantId])
 }
 
 model SupportTicket {

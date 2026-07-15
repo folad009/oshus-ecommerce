@@ -14,6 +14,9 @@ const STORAGE_KEY = "oshus-cart";
 
 export interface AddToCartInput {
   id: string;
+  productId: string;
+  variantId?: string;
+  variantLabel?: string;
   name: string;
   category: string;
   price: number;
@@ -37,6 +40,13 @@ interface CartContextValue {
 
 const CartContext = createContext<CartContextValue | null>(null);
 
+function normalizeCartItem(item: CartItem & { productId?: string }): CartItem {
+  return {
+    ...item,
+    productId: item.productId || item.id,
+  };
+}
+
 function loadItems(): CartItem[] {
   if (typeof window === "undefined") {
     return [];
@@ -47,7 +57,8 @@ function loadItems(): CartItem[] {
     if (!raw) {
       return [];
     }
-    return JSON.parse(raw) as CartItem[];
+    const parsed = JSON.parse(raw) as Array<CartItem & { productId?: string }>;
+    return parsed.map(normalizeCartItem);
   } catch {
     return [];
   }
@@ -140,7 +151,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 export function useCart() {
   const context = useContext(CartContext);
   if (!context) {
-    throw new Error("useCart must be used within CartProvider");
+    throw new Error("useCart must be used within a CartProvider");
   }
   return context;
 }

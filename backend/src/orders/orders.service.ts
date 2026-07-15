@@ -379,18 +379,38 @@ export class OrdersService {
     const productIds = dto.items
       .map((i) => i.productId)
       .filter((id): id is string => Boolean(id));
+    const variantIds = dto.items
+      .map((i) => i.variantId)
+      .filter((id): id is string => Boolean(id));
 
     const products =
       productIds.length > 0
         ? await this.prisma.product.findMany({
             where: { id: { in: productIds } },
-            select: { id: true, vendorId: true },
+            select: { id: true, vendorId: true, sku: true },
+          })
+        : [];
+
+    const variants =
+      variantIds.length > 0
+        ? await this.prisma.productVariant.findMany({
+            where: { id: { in: variantIds } },
+            select: {
+              id: true,
+              productId: true,
+              sku: true,
+              weight: true,
+              packSize: true,
+              flavour: true,
+            },
           })
         : [];
 
     const vendorByProduct = new Map(
       products.map((p) => [p.id, p.vendorId])
     );
+    const skuByProduct = new Map(products.map((p) => [p.id, p.sku]));
+    const variantById = new Map(variants.map((variant) => [variant.id, variant]));
 
     const order = await this.prisma.order.create({
       data: {
@@ -418,17 +438,39 @@ export class OrdersService {
             year: "numeric",
           }),
         items: {
-          create: orderItems.map((item) => ({
-            name: item.name,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            image: item.image,
-            productId: item.productId ?? null,
-            vendorId: item.productId
-              ? (vendorByProduct.get(item.productId) ?? null)
-              : null,
-            sku: item.productId?.slice(0, 8).toUpperCase() ?? "",
-          })),
+          create: orderItems.map((item) => {
+            const variant = item.variantId
+              ? variantById.get(item.variantId)
+              : undefined;
+            const productId = item.productId ?? variant?.productId ?? null;
+            const variantLabel =
+              item.variantLabel?.trim() ||
+              (variant
+                ? [variant.flavour, variant.packSize && variant.weight
+                    ? `${variant.packSize} x ${variant.weight}`
+                    : variant.weight || variant.packSize]
+                    .filter(Boolean)
+                    .join(" · ")
+                : "");
+
+            return {
+              name: item.name,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              image: item.image,
+              productId,
+              variantId: variant?.id ?? null,
+              variantLabel,
+              vendorId: productId
+                ? (vendorByProduct.get(productId) ?? null)
+                : null,
+              sku:
+                variant?.sku ||
+                (productId ? skuByProduct.get(productId) : "") ||
+                productId?.slice(0, 8).toUpperCase() ||
+                "",
+            };
+          }),
         },
       },
       include: { items: true },
