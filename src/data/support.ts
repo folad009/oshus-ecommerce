@@ -223,6 +223,7 @@ export const supportNavItems = [
   { label: "Dashboard", href: "/support", icon: "layout-dashboard" as const },
   { label: "Tickets", href: "/support/tickets", icon: "ticket" as const },
   { label: "Products", href: "/support/products", icon: "package" as const },
+  { label: "Vendors", href: "/support/vendors", icon: "store" as const },
   { label: "Orders", href: "/support/orders", icon: "shopping-bag" as const },
   {
     label: "Track Order",

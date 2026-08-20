@@ -10,6 +10,7 @@ import {
   Inbox,
   Truck,
   Package,
+  Store,
   LogOut,
   Menu,
   X,
@@ -26,6 +27,7 @@ const iconMap = {
   truck: Truck,
   inbox: Inbox,
   package: Package,
+  store: Store,
 } as const;
 
 interface SupportSidebarProps {

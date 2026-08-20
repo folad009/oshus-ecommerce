@@ -7,7 +7,16 @@ import type { StaffAccountPublic, StaffRole } from "@/data/staff-accounts";
 
 type StaffTab = "vendor" | "support";
 
-export function StaffAccountsPanel() {
+type StaffAccountsPanelProps = {
+  apiBase?: string;
+  /** When true, only create/list vendors (used by Support portal). */
+  vendorsOnly?: boolean;
+};
+
+export function StaffAccountsPanel({
+  apiBase = "/api/admin/staff",
+  vendorsOnly = false,
+}: StaffAccountsPanelProps) {
   const [accounts, setAccounts] = useState<StaffAccountPublic[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -16,28 +25,40 @@ export function StaffAccountsPanel() {
   const [tab, setTab] = useState<StaffTab>("vendor");
   const [role, setRole] = useState<StaffRole>("vendor");
 
+  const activeRole: StaffRole = vendorsOnly ? "vendor" : role;
+  const activeTab: StaffTab = vendorsOnly ? "vendor" : tab;
+
   const loadAccounts = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/staff");
+      const res = await fetch(apiBase);
       const data = (await res.json()) as {
         accounts?: StaffAccountPublic[];
         error?: string;
       };
 
       if (!res.ok) {
-        setError(data.error ?? "Failed to load staff accounts.");
+        setError(
+          data.error ??
+            (vendorsOnly
+              ? "Failed to load vendor accounts."
+              : "Failed to load staff accounts.")
+        );
         return;
       }
 
       setAccounts(data.accounts ?? []);
     } catch {
-      setError("Failed to load staff accounts.");
+      setError(
+        vendorsOnly
+          ? "Failed to load vendor accounts."
+          : "Failed to load staff accounts."
+      );
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [apiBase, vendorsOnly]);
 
   useEffect(() => {
     void loadAccounts();
@@ -56,15 +77,15 @@ export function StaffAccountsPanel() {
     const storeName = form.get("storeName") as string;
 
     try {
-      const res = await fetch("/api/admin/staff", {
+      const res = await fetch(apiBase, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
           email,
           password,
-          role,
-          storeName: role === "vendor" ? storeName : undefined,
+          role: activeRole,
+          storeName: activeRole === "vendor" ? storeName : undefined,
         }),
       });
 
@@ -76,7 +97,9 @@ export function StaffAccountsPanel() {
       }
 
       setSuccess(
-        `${role === "vendor" ? "Vendor" : "Support"} account created. Share the login credentials with them.`
+        activeRole === "vendor"
+          ? "Vendor account created. Share the login credentials with them."
+          : "Support account created. Share the login credentials with them."
       );
       e.currentTarget.reset();
       await loadAccounts();
@@ -87,17 +110,18 @@ export function StaffAccountsPanel() {
     }
   }
 
-  const filtered = accounts.filter((account) => account.role === tab);
+  const filtered = accounts.filter((account) => account.role === activeTab);
 
   return (
     <div className="flex flex-col gap-6">
       <div className="bg-white rounded-xl border border-border shadow-sm p-5 md:p-6">
         <h2 className="text-base font-bold text-foreground mb-1">
-          Create staff account
+          {vendorsOnly ? "Create vendor account" : "Create staff account"}
         </h2>
         <p className="text-sm text-muted-foreground mb-5">
-          Only admins can create vendor and support logins. Vendors cannot
-          self-register.
+          {vendorsOnly
+            ? "Create vendor portal logins. Vendors cannot self-register."
+            : "Create vendor and support portal logins. Vendors cannot self-register."}
         </p>
 
         {error && (
@@ -112,22 +136,24 @@ export function StaffAccountsPanel() {
         )}
 
         <form onSubmit={handleCreate} className="flex flex-col gap-4">
-          <div className="flex flex-wrap gap-2">
-            {(["vendor", "support"] as const).map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => setRole(option)}
-                className={`rounded-lg px-4 py-2 text-sm font-medium border transition-colors ${
-                  role === option
-                    ? "bg-coral text-white border-coral"
-                    : "bg-white text-foreground border-border hover:bg-light-gray"
-                }`}
-              >
-                {option === "vendor" ? "Vendor" : "Support"}
-              </button>
-            ))}
-          </div>
+          {!vendorsOnly && (
+            <div className="flex flex-wrap gap-2">
+              {(["vendor", "support"] as const).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setRole(option)}
+                  className={`rounded-lg px-4 py-2 text-sm font-medium border transition-colors ${
+                    role === option
+                      ? "bg-coral text-white border-coral"
+                      : "bg-white text-foreground border-border hover:bg-light-gray"
+                  }`}
+                >
+                  {option === "vendor" ? "Vendor" : "Support"}
+                </button>
+              ))}
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -161,7 +187,7 @@ export function StaffAccountsPanel() {
                 className="h-11 rounded-lg"
               />
             </div>
-            {role === "vendor" && (
+            {activeRole === "vendor" && (
               <div>
                 <label
                   htmlFor="staff-store"
@@ -202,7 +228,11 @@ export function StaffAccountsPanel() {
             disabled={submitting}
             className="w-full md:w-auto bg-coral hover:bg-coral-dark text-white rounded-lg h-11 text-sm font-semibold px-8"
           >
-            {submitting ? "Creating..." : `Create ${role} account`}
+            {submitting
+              ? "Creating..."
+              : vendorsOnly
+                ? "Create vendor account"
+                : `Create ${role} account`}
           </Button>
         </form>
       </div>
@@ -211,28 +241,32 @@ export function StaffAccountsPanel() {
         <div className="px-5 py-4 border-b border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <h2 className="text-base font-bold text-foreground">
-              Staff accounts
+              {vendorsOnly ? "Vendor accounts" : "Staff accounts"}
             </h2>
             <p className="text-sm text-muted-foreground">
-              Vendors and support agents with portal access
+              {vendorsOnly
+                ? "Vendors with portal access"
+                : "Vendors and support agents with portal access"}
             </p>
           </div>
-          <div className="flex gap-2">
-            {(["vendor", "support"] as const).map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => setTab(option)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold border transition-colors ${
-                  tab === option
-                    ? "bg-coral text-white border-coral"
-                    : "bg-white text-muted-foreground border-border hover:bg-light-gray"
-                }`}
-              >
-                {option === "vendor" ? "Vendors" : "Support"}
-              </button>
-            ))}
-          </div>
+          {!vendorsOnly && (
+            <div className="flex gap-2">
+              {(["vendor", "support"] as const).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setTab(option)}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold border transition-colors ${
+                    tab === option
+                      ? "bg-coral text-white border-coral"
+                      : "bg-white text-muted-foreground border-border hover:bg-light-gray"
+                  }`}
+                >
+                  {option === "vendor" ? "Vendors" : "Support"}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="overflow-x-auto">
@@ -245,7 +279,7 @@ export function StaffAccountsPanel() {
                 <th className="text-xs font-semibold text-muted-foreground px-5 py-3">
                   Email
                 </th>
-                {tab === "vendor" && (
+                {activeTab === "vendor" && (
                   <th className="text-xs font-semibold text-muted-foreground px-5 py-3">
                     Store
                   </th>
@@ -262,7 +296,7 @@ export function StaffAccountsPanel() {
               {loading ? (
                 <tr>
                   <td
-                    colSpan={tab === "vendor" ? 5 : 4}
+                    colSpan={activeTab === "vendor" ? 5 : 4}
                     className="px-5 py-8 text-sm text-muted-foreground text-center"
                   >
                     Loading accounts...
@@ -271,10 +305,10 @@ export function StaffAccountsPanel() {
               ) : filtered.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={tab === "vendor" ? 5 : 4}
+                    colSpan={activeTab === "vendor" ? 5 : 4}
                     className="px-5 py-8 text-sm text-muted-foreground text-center"
                   >
-                    No {tab} accounts yet.
+                    No {activeTab} accounts yet.
                   </td>
                 </tr>
               ) : (
@@ -289,7 +323,7 @@ export function StaffAccountsPanel() {
                     <td className="px-5 py-3.5 text-sm text-muted-foreground">
                       {account.email}
                     </td>
-                    {tab === "vendor" && (
+                    {activeTab === "vendor" && (
                       <td className="px-5 py-3.5 text-sm text-foreground">
                         {account.storeName ?? "—"}
                       </td>

@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   UnprocessableEntityException,
 } from "@nestjs/common";
@@ -12,10 +13,13 @@ import { CreateStaffDto } from "./dto/create-staff.dto";
 export class StaffService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async listStaff() {
+  async listStaff(actorRole: Role = Role.ADMIN) {
     const users = await this.prisma.user.findMany({
       where: {
-        role: { in: [Role.VENDOR, Role.SUPPORT] },
+        role:
+          actorRole === Role.SUPPORT
+            ? Role.VENDOR
+            : { in: [Role.VENDOR, Role.SUPPORT] },
       },
       orderBy: { createdAt: "desc" },
       select: {
@@ -40,7 +44,13 @@ export class StaffService {
     }));
   }
 
-  async createStaff(dto: CreateStaffDto) {
+  async createStaff(dto: CreateStaffDto, actorRole: Role = Role.ADMIN) {
+    if (actorRole === Role.SUPPORT && dto.role !== "vendor") {
+      throw new ForbiddenException(
+        "Support agents can only create vendor accounts."
+      );
+    }
+
     const email = dto.email.trim().toLowerCase();
     const existing = await this.prisma.user.findUnique({ where: { email } });
 
