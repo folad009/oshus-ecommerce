@@ -29,7 +29,7 @@ export class CategoriesController {
 
   @Get("admin")
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.SUPPORT)
   listAdmin() {
     return this.categoriesService
       .listCategoriesWithCounts()
@@ -38,7 +38,7 @@ export class CategoriesController {
 
   @Post("admin")
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.SUPPORT)
   create(@Body() body: CreateCategoryDto) {
     return this.categoriesService
       .createCategory(body)
@@ -47,7 +47,7 @@ export class CategoriesController {
 
   @Put("admin/:id")
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.SUPPORT)
   update(@Param("id") id: string, @Body() body: UpdateCategoryDto) {
     return this.categoriesService
       .updateCategory(id, body)
@@ -56,7 +56,7 @@ export class CategoriesController {
 
   @Delete("admin/:id")
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.SUPPORT)
   delete(@Param("id") id: string) {
     return this.categoriesService.deleteCategory(id);
   }
