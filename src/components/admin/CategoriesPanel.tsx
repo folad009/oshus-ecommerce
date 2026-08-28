@@ -5,7 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { AdminCategory } from "@/data/shop-categories";
 
-export function CategoriesPanel() {
+export function CategoriesPanel({
+  apiBase = "/api/admin/categories",
+}: {
+  apiBase?: string;
+}) {
   const [categories, setCategories] = useState<AdminCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -21,7 +25,7 @@ export function CategoriesPanel() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/categories");
+      const res = await fetch(apiBase);
       const data = (await res.json()) as {
         categories?: AdminCategory[];
         error?: string;
@@ -38,7 +42,7 @@ export function CategoriesPanel() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [apiBase]);
 
   useEffect(() => {
     void loadCategories();
@@ -51,7 +55,7 @@ export function CategoriesPanel() {
     setSubmitting(true);
 
     try {
-      const res = await fetch("/api/admin/categories", {
+      const res = await fetch(apiBase, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: newName }),
@@ -96,7 +100,7 @@ export function CategoriesPanel() {
     setSubmitting(true);
 
     try {
-      const res = await fetch(`/api/admin/categories/${editingId}`, {
+      const res = await fetch(`${apiBase}/${editingId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: editName }),
@@ -136,7 +140,7 @@ export function CategoriesPanel() {
     setSuccess("");
 
     try {
-      const res = await fetch(`/api/admin/categories/${id}`, {
+      const res = await fetch(`${apiBase}/${id}`, {
         method: "DELETE",
       });
 
